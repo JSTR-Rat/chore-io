@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "chore-io-dev",
+  "compatibility_date": "2025-12-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true
+  },
+  "limits": {
+    "cpu_ms": 10000
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chore-io-db",
+      "database_id": "fake_id",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "vars": {
+    "BETTER_AUTH_URL": "http://localhost:3000"
+  },
+  "env": {
+    "production": {
+      "name": "chore-io",
+      "routes": [
+        {
+          "pattern": "chores.jstr.sh",
+          "custom_domain": true
+        }
+      ],
+      "vars": {
+        "BETTER_AUTH_URL": "https://chores.jstr.sh"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "chore-io-db",
+          "database_id": "c95a3d9c-7a8d-4415-9e65-b0f3770189da",
+          "migrations_dir": "drizzle"
+        }
+      ]
+    }
+  }
+}
