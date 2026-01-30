@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+
+# Generated files
+src/routeTree.gen.ts
+*.gen.ts
+*.gen.tsx
+
+# Database
+drizzle/
+*.sql
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.turbo/
+.next/
+
+# Cloudflare
+.wrangler/
+wrangler.toml
+*.wrangler.json
+
+# Package manager files
+package-lock.json
+yarn.lock
+
+# Coverage
+coverage/
+.nyc_output/

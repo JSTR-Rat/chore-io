@@ -1,14 +1,22 @@
-import type { AnyFieldApi } from '@tanstack/react-form';
-import { FieldError } from './FieldError';
+import type { AnyFieldApi } from '@tanstack/react-form'
+import { FieldError } from './FieldError'
 
 interface FormFieldProps {
-  field: AnyFieldApi;
-  label: string;
-  type?: 'text' | 'email' | 'password';
-  placeholder?: string;
-  autoComplete?: string;
-  inputMode?: 'text' | 'numeric' | 'email' | 'tel' | 'url' | 'search' | 'none' | 'decimal';
-  maxLength?: number;
+  field: AnyFieldApi
+  label: string
+  type?: 'text' | 'email' | 'password'
+  placeholder?: string
+  autoComplete?: string
+  inputMode?:
+    | 'text'
+    | 'numeric'
+    | 'email'
+    | 'tel'
+    | 'url'
+    | 'search'
+    | 'none'
+    | 'decimal'
+  maxLength?: number
 }
 
 /**
@@ -24,13 +32,14 @@ export function FormField({
   inputMode,
   maxLength,
 }: FormFieldProps) {
-  const hasErrors = field.state.meta.errors && field.state.meta.errors.length > 0;
+  const hasErrors =
+    field.state.meta.errors && field.state.meta.errors.length > 0
 
   return (
     <div className="space-y-2">
       <label
         htmlFor={field.name}
-        className="block text-sm font-medium text-gray-700"
+        className="block text-sm font-medium text-text-muted"
       >
         {label}
       </label>
@@ -45,13 +54,13 @@ export function FormField({
         value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
-        className={`text-gray-950 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-          hasErrors ? 'border-red-500' : 'border-gray-300'
+        className={`w-full rounded-lg border bg-surface-input px-4 py-3 text-text placeholder-text-placeholder transition-all focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none ${
+          hasErrors ? 'border-error-border' : 'border-border-strong'
         }`}
         aria-invalid={hasErrors}
         aria-describedby={hasErrors ? `${field.name}-error` : undefined}
       />
       <FieldError field={field} />
     </div>
-  );
+  )
 }

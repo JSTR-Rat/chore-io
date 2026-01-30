@@ -1,7 +1,7 @@
-import type { AnyFieldApi } from '@tanstack/react-form';
+import type { AnyFieldApi } from '@tanstack/react-form'
 
 interface FieldErrorProps {
-  field: AnyFieldApi;
+  field: AnyFieldApi
 }
 
 /**
@@ -9,19 +9,19 @@ interface FieldErrorProps {
  * Supports both string errors and structured error objects.
  */
 export function FieldError({ field }: FieldErrorProps) {
-  const errors = field.state.meta.errors;
+  const errors = field.state.meta.errors
 
   if (!errors || errors.length === 0) {
-    return null;
+    return null
   }
 
   return (
-    <div className="mt-1 text-sm text-red-600" role="alert">
+    <div className="mt-1 text-sm text-error-text" role="alert">
       {errors.map((error) => {
         const message =
-          typeof error === 'string' ? error : error?.message || String(error);
-        return <div key={message}>{message}</div>;
+          typeof error === 'string' ? error : error?.message || String(error)
+        return <div key={message}>{message}</div>
       })}
     </div>
-  );
+  )
 }

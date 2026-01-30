@@ -8,6 +8,48 @@
       "when": 1768286100382,
       "tag": "0000_flowery_unicorn",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769064291012,
+      "tag": "0001_naive_ironclad",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769065508138,
+      "tag": "0002_solid_blur",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1769132202641,
+      "tag": "0003_many_lady_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1769132428549,
+      "tag": "0004_demonic_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1769133217120,
+      "tag": "0005_certain_talos",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1769149104207,
+      "tag": "0006_flawless_synch",
+      "breakpoints": true
     }
   ]
 }

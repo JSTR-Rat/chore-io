@@ -1,56 +1,56 @@
-import { authClient } from '@/lib/auth-client';
-import { getSessionData } from '@/utils/auth.functions';
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { authClient } from '@/lib/auth-client'
+import { getSessionData } from '@/utils/auth.functions'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
 
 export const Route = createFileRoute('/signout')({
   component: SignOutPage,
   beforeLoad: async () => {
-    const session = await getSessionData();
+    const session = await getSessionData()
     if (!session?.user) {
-      throw redirect({ to: '/' });
+      throw redirect({ to: '/' })
     }
   },
-});
+})
 
 function SignOutPage() {
-  const navigate = useNavigate();
-  const [isSigningOut, setIsSigningOut] = useState(true);
-  const hasSignedOut = useRef(false);
+  const navigate = useNavigate()
+  const [isSigningOut, setIsSigningOut] = useState(true)
+  const hasSignedOut = useRef(false)
 
   useEffect(() => {
     // Prevent duplicate sign-out calls
-    if (hasSignedOut.current) return;
-    hasSignedOut.current = true;
+    if (hasSignedOut.current) return
+    hasSignedOut.current = true
 
     const performSignOut = async () => {
       try {
         // Sign out using better-auth
-        await authClient.signOut();
+        await authClient.signOut()
 
         // Redirect to home page after successful sign-out
-        navigate({ to: '/' });
+        navigate({ to: '/' })
       } catch (error) {
-        console.error('Sign-out error:', error);
+        console.error('Sign-out error:', error)
         // Even if sign-out fails, redirect to home
         // The session may still be cleared on the client
-        navigate({ to: '/' });
+        navigate({ to: '/' })
       } finally {
-        setIsSigningOut(false);
+        setIsSigningOut(false)
       }
-    };
+    }
 
-    performSignOut();
-  }, [navigate]);
+    performSignOut()
+  }, [navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background-gradient-start via-background-gradient-mid to-background-gradient-end px-4">
       <div className="text-center">
         {isSigningOut ? (
           <>
-            <div className="flex justify-center mb-4">
+            <div className="mb-4 flex justify-center">
               <svg
-                className="animate-spin h-12 w-12 text-blue-600"
+                className="h-12 w-12 animate-spin text-primary"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -70,14 +70,14 @@ function SignOutPage() {
                 />
               </svg>
             </div>
-            <p className="text-lg text-gray-700 font-medium">
+            <p className="text-lg font-medium text-text-muted">
               Signing you out...
             </p>
           </>
         ) : (
-          <p className="text-lg text-gray-700 font-medium">Redirecting...</p>
+          <p className="text-lg font-medium text-text-muted">Redirecting...</p>
         )}
       </div>
     </div>
-  );
+  )
 }

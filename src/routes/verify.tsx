@@ -1,18 +1,18 @@
-import { authClient } from '@/lib/auth-client';
-import { auth } from '@/lib/auth';
-import { useForm } from '@tanstack/react-form';
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { createServerFn } from '@tanstack/react-start';
-import { getRequestHeaders } from '@tanstack/react-start/server';
-import { useState, useEffect } from 'react';
-import { z } from 'zod';
+import { authClient } from '@/lib/auth-client'
+import { auth } from '@/lib/auth'
+import { useForm } from '@tanstack/react-form'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { getRequestHeaders } from '@tanstack/react-start/server'
+import { useState, useEffect } from 'react'
+import { z } from 'zod'
 import {
   AuthFormLayout,
   AuthFormShell,
   FormField,
   ServerError,
   AuthSubmitButton,
-} from '@/components/auth';
+} from '@/components/auth'
 
 // Zod schema for OTP validation
 const otpSchema = z.object({
@@ -21,68 +21,68 @@ const otpSchema = z.object({
     .min(6, 'OTP must be 6 characters')
     .max(6, 'OTP must be 6 characters')
     .regex(/^\d+$/, 'OTP must contain only numbers'),
-});
+})
 
-type OtpFormValues = z.infer<typeof otpSchema>;
+type OtpFormValues = z.infer<typeof otpSchema>
 
 // Server function to get user email from session
 const getUserEmail = createServerFn({ method: 'GET' }).handler(async () => {
-  const headers = getRequestHeaders();
-  const session = await auth.api.getSession({ headers });
-  return session?.user?.email || null;
-});
+  const headers = getRequestHeaders()
+  const session = await auth.api.getSession({ headers })
+  return session?.user?.email || null
+})
 
 // Server function to get session data
 const getSessionData = createServerFn({ method: 'GET' }).handler(async () => {
-  const headers = getRequestHeaders();
-  const session = await auth.api.getSession({ headers });
-  return session;
-});
+  const headers = getRequestHeaders()
+  const session = await auth.api.getSession({ headers })
+  return session
+})
 
 export const Route = createFileRoute('/verify')({
   component: VerifyPage,
   beforeLoad: async () => {
-    const session = await getSessionData();
+    const session = await getSessionData()
     if (!session?.user) {
       throw redirect({
         to: '/signin',
-      });
+      })
     }
     if (session?.user.emailVerified) {
-      throw redirect({ to: '/dashboard' });
+      throw redirect({ to: '/dashboard' })
     }
   },
   loader: async () => {
-    const email = await getUserEmail();
-    return { email };
+    const email = await getUserEmail()
+    return { email }
   },
-});
+})
 
 function VerifyPage() {
-  const navigate = useNavigate();
-  const { email } = Route.useLoaderData();
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [resendSuccess, setResendSuccess] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState<number>(0);
-  const [isResending, setIsResending] = useState(false);
+  const navigate = useNavigate()
+  const { email } = Route.useLoaderData()
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [resendSuccess, setResendSuccess] = useState<string | null>(null)
+  const [resendCooldown, setResendCooldown] = useState<number>(0)
+  const [isResending, setIsResending] = useState(false)
 
   if (!email) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-900">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background-gradient-start via-background-gradient-mid to-background-gradient-end">
+        <p className="text-text">Loading...</p>
       </div>
-    );
+    )
   }
 
   // Cooldown timer effect
   useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => {
-        setResendCooldown(resendCooldown - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
+        setResendCooldown(resendCooldown - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
     }
-  }, [resendCooldown]);
+  }, [resendCooldown])
 
   const form = useForm({
     defaultValues: {
@@ -93,64 +93,64 @@ function VerifyPage() {
     },
     onSubmit: async ({ value }) => {
       try {
-        setServerError(null);
-        setResendSuccess(null);
+        setServerError(null)
+        setResendSuccess(null)
 
         // Verify OTP using better-auth
         const { data, error } = await authClient.emailOtp.verifyEmail({
           email,
           otp: value.otp,
-        });
+        })
 
         if (error) {
           setServerError(
-            error.message || 'Invalid verification code. Please try again.'
-          );
-          return;
+            error.message || 'Invalid verification code. Please try again.',
+          )
+          return
         }
 
         if (data) {
           // Successful verification
-          navigate({ to: '/dashboard' });
+          navigate({ to: '/dashboard' })
         }
       } catch (err) {
-        console.error('Verification error:', err);
-        setServerError('An unexpected error occurred. Please try again later.');
+        console.error('Verification error:', err)
+        setServerError('An unexpected error occurred. Please try again later.')
       }
     },
-  });
+  })
 
   const handleResend = async () => {
     if (resendCooldown > 0 || isResending) {
-      return;
+      return
     }
 
     try {
-      setIsResending(true);
-      setServerError(null);
-      setResendSuccess(null);
+      setIsResending(true)
+      setServerError(null)
+      setResendSuccess(null)
 
       const { error } = await authClient.emailOtp.sendVerificationOtp({
         email,
         type: 'email-verification',
-      });
+      })
 
       if (error) {
         setServerError(
           error.message ||
-            'Failed to resend verification code. Please try again.'
-        );
+            'Failed to resend verification code. Please try again.',
+        )
       } else {
-        setResendSuccess('Verification code sent! Check your email.');
-        setResendCooldown(60); // Start 60-second cooldown
+        setResendSuccess('Verification code sent! Check your email.')
+        setResendCooldown(60) // Start 60-second cooldown
       }
     } catch (err) {
-      console.error('Resend error:', err);
-      setServerError('An unexpected error occurred. Please try again later.');
+      console.error('Resend error:', err)
+      setServerError('An unexpected error occurred. Please try again later.')
     } finally {
-      setIsResending(false);
+      setIsResending(false)
     }
-  };
+  }
 
   return (
     <AuthFormLayout
@@ -159,16 +159,16 @@ function VerifyPage() {
     >
       <AuthFormShell
         onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
+          e.preventDefault()
+          e.stopPropagation()
+          form.handleSubmit()
         }}
       >
         <ServerError error={serverError} />
 
         {resendSuccess && (
-          <div className="rounded-md bg-green-50 p-4 mb-4">
-            <p className="text-sm text-green-800">{resendSuccess}</p>
+          <div className="mb-4 rounded-md border border-success-border bg-success-bg p-4">
+            <p className="text-sm text-success-text">{resendSuccess}</p>
           </div>
         )}
 
@@ -213,26 +213,26 @@ function VerifyPage() {
             disabled={resendCooldown > 0 || isResending}
             className={`w-full text-sm font-medium ${
               resendCooldown > 0 || isResending
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-600 hover:text-blue-500'
+                ? 'cursor-not-allowed text-text-disabled'
+                : 'text-primary-light hover:text-primary-lighter'
             } transition-colors`}
           >
             {isResending
               ? 'Sending...'
               : resendCooldown > 0
-              ? `Resend code in ${resendCooldown}s`
-              : 'Resend verification code'}
+                ? `Resend code in ${resendCooldown}s`
+                : 'Resend verification code'}
           </button>
         </div>
 
         {/* Help Text */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-text-subtle">
             Didn't receive the code? Check your spam folder or click resend
             above.
           </p>
         </div>
       </AuthFormShell>
     </AuthFormLayout>
-  );
+  )
 }

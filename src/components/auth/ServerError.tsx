@@ -1,5 +1,5 @@
 interface ServerErrorProps {
-  error: string | null;
+  error: string | null
 }
 
 /**
@@ -7,15 +7,15 @@ interface ServerErrorProps {
  */
 export function ServerError({ error }: ServerErrorProps) {
   if (!error) {
-    return null;
+    return null
   }
 
   return (
     <div
-      className="p-4 bg-red-50 border border-red-200 rounded-lg"
+      className="rounded-lg border border-error-border-subtle bg-error-bg p-4"
       role="alert"
     >
-      <p className="text-sm text-red-800">{error}</p>
+      <p className="text-sm text-error-text">{error}</p>
     </div>
-  );
+  )
 }

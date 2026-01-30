@@ -5,14 +5,14 @@
  * Cloudflare D1 Database Binding
  * This type is provided by @cloudflare/workers-types
  */
-export type D1Database = D1Database;
+export type D1Database = D1Database
 
 /**
  * Cloudflare Environment Bindings
  * These are the bindings defined in wrangler.jsonc
  */
 export interface Env {
-  DB: D1Database;
+  DB: D1Database
 }
 
 /**
@@ -22,9 +22,9 @@ export interface Env {
 declare module '@tanstack/react-start/server' {
   interface RequestEventBase {
     cloudflare?: {
-      request?: Request;
-      env?: Env;
-      ctx?: ExecutionContext;
-    };
+      request?: Request
+      env?: Env
+      ctx?: ExecutionContext
+    }
   }
 }

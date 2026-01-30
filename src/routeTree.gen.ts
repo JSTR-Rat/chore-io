@@ -13,9 +13,17 @@ import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SignoutRouteImport } from './routes/signout'
 import { Route as SigninRouteImport } from './routes/signin'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedDashboardRouteImport } from './routes/_authed.dashboard'
+import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed.dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AuthedDashboardPropertyIdRouteImport } from './routes/_authed.dashboard/$propertyId'
+import { Route as AuthedDashboardPropertyIdIndexRouteImport } from './routes/_authed.dashboard/$propertyId/index'
+import { Route as AuthedDashboardPropertyIdFloorplanEditRouteImport } from './routes/_authed.dashboard/$propertyId/floorplan.edit'
+import { Route as AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/index'
+import { Route as AuthedDashboardPropertyIdRoomRoomIdNewRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/new'
+import { Route as AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/edit.$choreId'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -37,9 +45,8 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -47,73 +54,159 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthedDashboardRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedDashboardPropertyIdRoute =
+  AuthedDashboardPropertyIdRouteImport.update({
+    id: '/$propertyId',
+    path: '/$propertyId',
+    getParentRoute: () => AuthedDashboardRoute,
+  } as any)
+const AuthedDashboardPropertyIdIndexRoute =
+  AuthedDashboardPropertyIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
+const AuthedDashboardPropertyIdFloorplanEditRoute =
+  AuthedDashboardPropertyIdFloorplanEditRouteImport.update({
+    id: '/floorplan/edit',
+    path: '/floorplan/edit',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
+const AuthedDashboardPropertyIdRoomRoomIdIndexRoute =
+  AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport.update({
+    id: '/room/$roomId/',
+    path: '/room/$roomId/',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
+const AuthedDashboardPropertyIdRoomRoomIdNewRoute =
+  AuthedDashboardPropertyIdRoomRoomIdNewRouteImport.update({
+    id: '/room/$roomId/new',
+    path: '/room/$roomId/new',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
+const AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute =
+  AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRouteImport.update({
+    id: '/room/$roomId/edit/$choreId',
+    path: '/room/$roomId/edit/$choreId',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/verify': typeof VerifyRoute
+  '/dashboard': typeof AuthedDashboardRouteWithChildren
+  '/dashboard/$propertyId': typeof AuthedDashboardPropertyIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/': typeof AuthedDashboardIndexRoute
+  '/dashboard/$propertyId/': typeof AuthedDashboardPropertyIdIndexRoute
+  '/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
+  '/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
+  '/dashboard/$propertyId/room/$roomId': typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
+  '/dashboard/$propertyId/room/$roomId/edit/$choreId': typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/signin': typeof SigninRoute
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/verify': typeof VerifyRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard': typeof AuthedDashboardIndexRoute
+  '/dashboard/$propertyId': typeof AuthedDashboardPropertyIdIndexRoute
+  '/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
+  '/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
+  '/dashboard/$propertyId/room/$roomId': typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
+  '/dashboard/$propertyId/room/$roomId/edit/$choreId': typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/_authed': typeof AuthedRouteWithChildren
   '/signin': typeof SigninRoute
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/verify': typeof VerifyRoute
+  '/_authed/dashboard': typeof AuthedDashboardRouteWithChildren
+  '/_authed/dashboard/$propertyId': typeof AuthedDashboardPropertyIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
+  '/_authed/dashboard/$propertyId/': typeof AuthedDashboardPropertyIdIndexRoute
+  '/_authed/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
+  '/_authed/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
+  '/_authed/dashboard/$propertyId/room/$roomId/': typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
+  '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId': typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/signin'
     | '/signout'
     | '/signup'
     | '/verify'
+    | '/dashboard'
+    | '/dashboard/$propertyId'
     | '/api/auth/$'
+    | '/dashboard/'
+    | '/dashboard/$propertyId/'
+    | '/dashboard/$propertyId/floorplan/edit'
+    | '/dashboard/$propertyId/room/$roomId/new'
+    | '/dashboard/$propertyId/room/$roomId'
+    | '/dashboard/$propertyId/room/$roomId/edit/$choreId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/signin'
     | '/signout'
     | '/signup'
     | '/verify'
     | '/api/auth/$'
+    | '/dashboard'
+    | '/dashboard/$propertyId'
+    | '/dashboard/$propertyId/floorplan/edit'
+    | '/dashboard/$propertyId/room/$roomId/new'
+    | '/dashboard/$propertyId/room/$roomId'
+    | '/dashboard/$propertyId/room/$roomId/edit/$choreId'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
+    | '/_authed'
     | '/signin'
     | '/signout'
     | '/signup'
     | '/verify'
+    | '/_authed/dashboard'
+    | '/_authed/dashboard/$propertyId'
     | '/api/auth/$'
+    | '/_authed/dashboard/'
+    | '/_authed/dashboard/$propertyId/'
+    | '/_authed/dashboard/$propertyId/floorplan/edit'
+    | '/_authed/dashboard/$propertyId/room/$roomId/new'
+    | '/_authed/dashboard/$propertyId/room/$roomId/'
+    | '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
   SigninRoute: typeof SigninRoute
   SignoutRoute: typeof SignoutRoute
   SignupRoute: typeof SignupRoute
@@ -151,11 +244,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -165,6 +258,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/dashboard': {
+      id: '/_authed/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/dashboard/': {
+      id: '/_authed/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthedDashboardIndexRouteImport
+      parentRoute: typeof AuthedDashboardRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -172,12 +279,105 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/dashboard/$propertyId': {
+      id: '/_authed/dashboard/$propertyId'
+      path: '/$propertyId'
+      fullPath: '/dashboard/$propertyId'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdRouteImport
+      parentRoute: typeof AuthedDashboardRoute
+    }
+    '/_authed/dashboard/$propertyId/': {
+      id: '/_authed/dashboard/$propertyId/'
+      path: '/'
+      fullPath: '/dashboard/$propertyId/'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdIndexRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
+    '/_authed/dashboard/$propertyId/floorplan/edit': {
+      id: '/_authed/dashboard/$propertyId/floorplan/edit'
+      path: '/floorplan/edit'
+      fullPath: '/dashboard/$propertyId/floorplan/edit'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdFloorplanEditRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
+    '/_authed/dashboard/$propertyId/room/$roomId/': {
+      id: '/_authed/dashboard/$propertyId/room/$roomId/'
+      path: '/room/$roomId'
+      fullPath: '/dashboard/$propertyId/room/$roomId'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
+    '/_authed/dashboard/$propertyId/room/$roomId/new': {
+      id: '/_authed/dashboard/$propertyId/room/$roomId/new'
+      path: '/room/$roomId/new'
+      fullPath: '/dashboard/$propertyId/room/$roomId/new'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdNewRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
+    '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId': {
+      id: '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId'
+      path: '/room/$roomId/edit/$choreId'
+      fullPath: '/dashboard/$propertyId/room/$roomId/edit/$choreId'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
   }
 }
 
+interface AuthedDashboardPropertyIdRouteChildren {
+  AuthedDashboardPropertyIdIndexRoute: typeof AuthedDashboardPropertyIdIndexRoute
+  AuthedDashboardPropertyIdFloorplanEditRoute: typeof AuthedDashboardPropertyIdFloorplanEditRoute
+  AuthedDashboardPropertyIdRoomRoomIdNewRoute: typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
+  AuthedDashboardPropertyIdRoomRoomIdIndexRoute: typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
+  AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute: typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
+}
+
+const AuthedDashboardPropertyIdRouteChildren: AuthedDashboardPropertyIdRouteChildren =
+  {
+    AuthedDashboardPropertyIdIndexRoute: AuthedDashboardPropertyIdIndexRoute,
+    AuthedDashboardPropertyIdFloorplanEditRoute:
+      AuthedDashboardPropertyIdFloorplanEditRoute,
+    AuthedDashboardPropertyIdRoomRoomIdNewRoute:
+      AuthedDashboardPropertyIdRoomRoomIdNewRoute,
+    AuthedDashboardPropertyIdRoomRoomIdIndexRoute:
+      AuthedDashboardPropertyIdRoomRoomIdIndexRoute,
+    AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute:
+      AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute,
+  }
+
+const AuthedDashboardPropertyIdRouteWithChildren =
+  AuthedDashboardPropertyIdRoute._addFileChildren(
+    AuthedDashboardPropertyIdRouteChildren,
+  )
+
+interface AuthedDashboardRouteChildren {
+  AuthedDashboardPropertyIdRoute: typeof AuthedDashboardPropertyIdRouteWithChildren
+  AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
+}
+
+const AuthedDashboardRouteChildren: AuthedDashboardRouteChildren = {
+  AuthedDashboardPropertyIdRoute: AuthedDashboardPropertyIdRouteWithChildren,
+  AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
+}
+
+const AuthedDashboardRouteWithChildren = AuthedDashboardRoute._addFileChildren(
+  AuthedDashboardRouteChildren,
+)
+
+interface AuthedRouteChildren {
+  AuthedDashboardRoute: typeof AuthedDashboardRouteWithChildren
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedDashboardRoute: AuthedDashboardRouteWithChildren,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  AuthedRoute: AuthedRouteWithChildren,
   SigninRoute: SigninRoute,
   SignoutRoute: SignoutRoute,
   SignupRoute: SignupRoute,

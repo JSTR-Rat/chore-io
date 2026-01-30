@@ -1,21 +1,22 @@
-import * as React from 'react';
+import * as React from 'react'
 
 interface VerifyEmailTemplateProps {
-  otp: string;
-  email?: string;
-  expiresInMinutes?: number;
+  otp: string
+  email?: string
+  expiresInMinutes?: number
 }
 
-export function VerifyEmailTemplate({ 
-  otp, 
+export function VerifyEmailTemplate({
+  otp,
   email,
-  expiresInMinutes = 10 
+  expiresInMinutes = 10,
 }: VerifyEmailTemplateProps) {
   return (
     <div
       style={{
         backgroundColor: '#0a0a0a',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         lineHeight: '1.6',
         margin: '0',
         padding: '40px 20px',
@@ -80,8 +81,9 @@ export function VerifyEmailTemplate({
               lineHeight: '1.6',
             }}
           >
-            We received a request to verify your email address{email ? ` (${email})` : ''}. 
-            Use the verification code below to complete your sign-up.
+            We received a request to verify your email address
+            {email ? ` (${email})` : ''}. Use the verification code below to
+            complete your sign-up.
           </p>
 
           {/* OTP Card */}
@@ -143,7 +145,10 @@ export function VerifyEmailTemplate({
                 lineHeight: '1.5',
               }}
             >
-              ⏱️ This code will expire in <strong style={{ color: '#ffffff' }}>{expiresInMinutes} minutes</strong>
+              ⏱️ This code will expire in{' '}
+              <strong style={{ color: '#ffffff' }}>
+                {expiresInMinutes} minutes
+              </strong>
             </p>
           </div>
 
@@ -156,8 +161,8 @@ export function VerifyEmailTemplate({
               lineHeight: '1.6',
             }}
           >
-            Enter this code in the verification page to continue. 
-            If you didn't request this code, you can safely ignore this email.
+            Enter this code in the verification page to continue. If you didn't
+            request this code, you can safely ignore this email.
           </p>
 
           {/* Security Note */}
@@ -175,8 +180,9 @@ export function VerifyEmailTemplate({
                 lineHeight: '1.5',
               }}
             >
-              🔒 <strong style={{ color: '#a3a3a3' }}>Security tip:</strong> Never share this code with anyone. 
-              We'll never ask you for your verification code.
+              🔒 <strong style={{ color: '#a3a3a3' }}>Security tip:</strong>{' '}
+              Never share this code with anyone. We'll never ask you for your
+              verification code.
             </p>
           </div>
         </div>
@@ -203,7 +209,7 @@ export function VerifyEmailTemplate({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default VerifyEmailTemplate;
+export default VerifyEmailTemplate

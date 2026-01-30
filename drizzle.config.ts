@@ -1,13 +1,13 @@
-import { defineConfig } from 'drizzle-kit';
+import { defineConfig } from 'drizzle-kit'
 
 /**
  * Drizzle Kit Configuration for Cloudflare D1
- * 
+ *
  * This config is used by drizzle-kit for:
  * - Generating migrations from schema changes
  * - Managing database migrations
  * - Introspecting the database
- * 
+ *
  * For D1, migrations are applied by Cloudflare Workers, not by drizzle-kit directly.
  * The migrations_dir must match what's in wrangler.jsonc.
  */
@@ -39,4 +39,4 @@ export default defineConfig({
 
   // Strict mode ensures type safety
   strict: true,
-});
+})

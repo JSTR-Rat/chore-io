@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 interface AuthSubmitButtonProps {
-  isSubmitting: boolean;
-  canSubmit: boolean;
-  loadingText: string;
-  children: ReactNode;
+  isSubmitting: boolean
+  canSubmit: boolean
+  loadingText: string
+  children: ReactNode
 }
 
 /**
@@ -21,12 +21,12 @@ export function AuthSubmitButton({
     <button
       type="submit"
       disabled={!canSubmit || isSubmitting}
-      className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      className="w-full rounded-lg bg-linear-to-r from-primary-from to-primary-to px-4 py-3 font-semibold text-text shadow-lg shadow-primary-shadow transition-all duration-200 hover:from-primary-from-hover hover:to-primary-to-hover hover:shadow-primary-shadow-hover focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-gradient-mid focus:outline-none disabled:cursor-not-allowed disabled:from-surface-disabled disabled:to-surface-disabled"
     >
       {isSubmitting ? (
         <span className="flex items-center justify-center">
           <svg
-            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            className="mr-3 -ml-1 h-5 w-5 animate-spin text-text"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -51,5 +51,5 @@ export function AuthSubmitButton({
         children
       )}
     </button>
-  );
+  )
 }

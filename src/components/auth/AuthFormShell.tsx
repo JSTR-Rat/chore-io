@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 interface AuthFormShellProps {
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  children: ReactNode;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  children: ReactNode
 }
 
 /**
@@ -10,10 +10,10 @@ interface AuthFormShellProps {
  */
 export function AuthFormShell({ onSubmit, children }: AuthFormShellProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="rounded-lg border border-border bg-surface p-8 shadow-lg backdrop-blur-sm">
       <form onSubmit={onSubmit} className="space-y-6" noValidate>
         {children}
       </form>
     </div>
-  );
+  )
 }
