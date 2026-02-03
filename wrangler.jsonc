@@ -20,6 +20,7 @@
   ],
   "vars": {
     "BETTER_AUTH_URL": "http://localhost:3000",
+    "BASE_URL": "http://localhost:3000",
   },
   "env": {
     "production": {
@@ -32,6 +33,7 @@
       ],
       "vars": {
         "BETTER_AUTH_URL": "https://chores.jstr.sh",
+        "BASE_URL": "https://chores.jstr.sh",
       },
       "d1_databases": [
         {

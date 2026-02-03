@@ -1,6 +1,6 @@
 // src/routes/__root.tsx
 /// <reference types="vite/client" />
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 import {
   Outlet,
   createRootRoute,
@@ -8,20 +8,20 @@ import {
   Scripts,
   Link,
   useRouter,
-} from '@tanstack/react-router'
+} from '@tanstack/react-router';
 
-import appCSS from '../styles/app.css?url'
+import appCSS from '../styles/app.css?url';
 
 // Define the context type for routes
 type RouteContext = {
   session?: {
     user: {
-      id: string
-      email: string
-      name: string
-    }
-  } | null
-}
+      id: string;
+      email: string;
+      name: string;
+    };
+  } | null;
+};
 
 export const Route = createRootRoute({
   head: () => ({
@@ -41,14 +41,14 @@ export const Route = createRootRoute({
   }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
-})
+});
 
 function RootComponent() {
   return (
     <RootDocument>
       <Outlet />
     </RootDocument>
-  )
+  );
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
@@ -57,20 +57,20 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-background text-text">
+      <body className="min-h-screen bg-linear-to-br from-background-gradient-start via-background-gradient-mid to-background-gradient-end text-text">
         {children}
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
 
 function NotFoundComponent() {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleGoBack = () => {
-    router.history.back()
-  }
+    router.history.back();
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background-gradient-start via-background-gradient-mid to-background-gradient-end px-4">
@@ -115,5 +115,5 @@ function NotFoundComponent() {
         </div>
       </div>
     </div>
-  )
+  );
 }

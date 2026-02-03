@@ -1,8 +1,8 @@
-import { authClient } from '@/lib/auth-client'
-import { useForm } from '@tanstack/react-form'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { z } from 'zod'
+import { authClient } from '@/lib/auth-client';
+import { useForm } from '@tanstack/react-form';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { z } from 'zod';
 import {
   AuthFormLayout,
   AuthFormShell,
@@ -10,8 +10,8 @@ import {
   FormField,
   ServerError,
   AuthSubmitButton,
-} from '@/components/auth'
-import { getSessionData } from '@/utils/auth.functions'
+} from '@/components/auth';
+import { getSessionData } from '@/utils/auth.functions';
 
 // Zod schema for signin validation
 const signinSchema = z.object({
@@ -20,9 +20,9 @@ const signinSchema = z.object({
     .string()
     .min(1, 'Password is required')
     .max(100, 'Password is too long'),
-})
+});
 
-type SigninFormValues = z.infer<typeof signinSchema>
+type SigninFormValues = z.infer<typeof signinSchema>;
 
 // Route definition with server-side auth check
 export const Route = createFileRoute('/signin')({
@@ -31,20 +31,20 @@ export const Route = createFileRoute('/signin')({
   }),
   component: SignInPage,
   beforeLoad: async ({ search }) => {
-    const session = await getSessionData()
+    const session = await getSessionData();
     if (session?.user && !session.user.emailVerified) {
-      throw redirect({ to: '/verify' })
+      throw redirect({ to: '/verify', search: { redirect: search.redirect } });
     }
     if (session?.user) {
-      throw redirect({ to: search.redirect || '/dashboard' })
+      throw redirect({ to: search.redirect || '/dashboard' });
     }
   },
-})
+});
 
 function SignInPage() {
-  const navigate = useNavigate()
-  const search = Route.useSearch()
-  const [serverError, setServerError] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const search = Route.useSearch();
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -56,20 +56,20 @@ function SignInPage() {
     },
     onSubmit: async ({ value }) => {
       try {
-        setServerError(null)
+        setServerError(null);
 
         // Sign in using better-auth
         const { data, error } = await authClient.signIn.email({
           email: value.email,
           password: value.password,
-        })
+        });
 
         if (error) {
           setServerError(
             error.message ||
               'Failed to sign in. Please check your credentials.',
-          )
-          return
+          );
+          return;
         }
 
         if (data) {
@@ -77,19 +77,19 @@ function SignInPage() {
 
           if (!data.user.emailVerified) {
             // User is not verified - redirect to verification page
-            navigate({ to: '/verify' })
+            navigate({ to: '/verify', search: { redirect: search.redirect } });
           } else {
             // User is verified - redirect to the intended destination
-            const redirectTo = search.redirect || '/dashboard'
-            navigate({ to: redirectTo })
+            const redirectTo = search.redirect || '/dashboard';
+            navigate({ to: redirectTo });
           }
         }
       } catch (err) {
-        console.error('Sign-in error:', err)
-        setServerError('An unexpected error occurred. Please try again later.')
+        console.error('Sign-in error:', err);
+        setServerError('An unexpected error occurred. Please try again later.');
       }
     },
-  })
+  });
 
   return (
     <AuthFormLayout
@@ -98,9 +98,9 @@ function SignInPage() {
     >
       <AuthFormShell
         onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          form.handleSubmit()
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
         }}
       >
         <ServerError error={serverError} />
@@ -152,10 +152,12 @@ function SignInPage() {
         {/* Sign Up Link */}
         <AuthFormLink
           text="Don't have an account?"
-          linkText="Sign up"
-          href="/signup"
-        />
+          to="/signup"
+          search={{ redirect: search.redirect }}
+        >
+          Sign up
+        </AuthFormLink>
       </AuthFormShell>
     </AuthFormLayout>
-  )
+  );
 }

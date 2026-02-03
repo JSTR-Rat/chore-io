@@ -1,43 +1,47 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { getDB } from '@/db/client'
-import { property } from '@/db/schema/app'
-import { useState } from 'react'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { getDB } from '@/db/client';
+import { property, userToProperty } from '@/db/schema/app';
+import { useState } from 'react';
+import { getSessionData } from '@/utils/auth.functions';
+import { eq } from 'drizzle-orm';
 
 // Server function to load all properties
 const loadProperties = createServerFn({ method: 'GET' }).handler(async () => {
-  const db = getDB()
+  const db = getDB();
+  const session = await getSessionData();
+  if (!session?.user) {
+    throw new Error('Unauthorized');
+  }
 
   const properties = await db
-    .select({
-      id: property.id,
-      name: property.name,
-      createdAt: property.createdAt,
-    })
+    .select()
     .from(property)
-    .orderBy(property.createdAt)
+    .leftJoin(userToProperty, eq(property.id, userToProperty.propertyId))
+    .where(eq(userToProperty.userId, session.user.id))
+    .orderBy(property.createdAt);
 
   return {
     properties: properties.map((p) => ({
-      id: String(p.id),
-      name: p.name,
-      createdAt: p.createdAt,
+      id: String(p.property.id),
+      name: p.property.name,
+      createdAt: p.property.createdAt,
     })),
-  }
-})
+  };
+});
 
 // Server function to add a new property
 const addProperty = createServerFn({ method: 'POST' })
   .inputValidator((data: { name: string }) => data)
   .handler(async ({ data }) => {
-    const db = getDB()
+    const db = getDB();
 
     const [newProperty] = await db
       .insert(property)
       .values({
         name: data.name,
       })
-      .returning()
+      .returning();
 
     return {
       property: {
@@ -45,40 +49,40 @@ const addProperty = createServerFn({ method: 'POST' })
         name: newProperty.name,
         createdAt: newProperty.createdAt,
       },
-    }
-  })
+    };
+  });
 
 export const Route = createFileRoute('/_authed/dashboard/')({
   loader: async () => {
-    return await loadProperties()
+    return await loadProperties();
   },
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  const { properties } = Route.useLoaderData()
-  const router = useRouter()
-  const [showAddProperty, setShowAddProperty] = useState(false)
-  const [newPropertyName, setNewPropertyName] = useState('')
-  const [isAdding, setIsAdding] = useState(false)
+  const { properties } = Route.useLoaderData();
+  const router = useRouter();
+  const [showAddProperty, setShowAddProperty] = useState(false);
+  const [newPropertyName, setNewPropertyName] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleAddProperty = async () => {
-    if (!newPropertyName.trim() || isAdding) return
+    if (!newPropertyName.trim() || isAdding) return;
 
-    setIsAdding(true)
+    setIsAdding(true);
     try {
-      await addProperty({ data: { name: newPropertyName } })
-      setNewPropertyName('')
-      setShowAddProperty(false)
+      await addProperty({ data: { name: newPropertyName } });
+      setNewPropertyName('');
+      setShowAddProperty(false);
       // Invalidate and reload the route data
-      await router.invalidate()
+      await router.invalidate();
     } catch (error) {
-      console.error('Failed to add property:', error)
-      alert('Failed to add property. Please try again.')
+      console.error('Failed to add property:', error);
+      alert('Failed to add property. Please try again.');
     } finally {
-      setIsAdding(false)
+      setIsAdding(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -105,8 +109,8 @@ function RouteComponent() {
                 placeholder="Property name..."
                 className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-text placeholder-text-muted focus:border-primary focus:outline-none"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddProperty()
-                  if (e.key === 'Escape') setShowAddProperty(false)
+                  if (e.key === 'Enter') handleAddProperty();
+                  if (e.key === 'Escape') setShowAddProperty(false);
                 }}
               />
               <button
@@ -118,8 +122,8 @@ function RouteComponent() {
               </button>
               <button
                 onClick={() => {
-                  setShowAddProperty(false)
-                  setNewPropertyName('')
+                  setShowAddProperty(false);
+                  setNewPropertyName('');
                 }}
                 className="rounded-lg border border-border bg-surface px-4 py-2 text-text transition-colors hover:bg-surface-hover"
               >
@@ -161,5 +165,5 @@ function RouteComponent() {
         </p>
       </div>
     </div>
-  )
+  );
 }

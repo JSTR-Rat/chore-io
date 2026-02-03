@@ -1,7 +1,13 @@
 // src/db/schema.ts
-import { sqliteTable, text, integer, index, unique } from 'drizzle-orm/sqlite-core'
-import { sql } from 'drizzle-orm'
-import { user } from './auth'
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  unique,
+} from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import { user } from './auth';
 
 /**
  * Properties Table
@@ -26,7 +32,7 @@ export const property = sqliteTable('property', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
-})
+});
 
 /**
  * Rooms Table
@@ -57,7 +63,7 @@ export const room = sqliteTable('room', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
-})
+});
 
 /**
  * Chores Table
@@ -94,7 +100,7 @@ export const chore = sqliteTable('chore', {
   updatedAt: integer('updated_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
-})
+});
 
 /**
  * Chore History Table
@@ -135,7 +141,7 @@ export const choreHistory = sqliteTable(
   (table) => [
     index('chore_completed_at_idx').on(table.choreId, table.completedAt),
   ],
-)
+);
 
 /**
  * Users to Properties Junction Table
@@ -168,4 +174,18 @@ export const userToProperty = sqliteTable('user_to_property', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
-})
+});
+
+export const invite = sqliteTable('invite', {
+  id: text('id').primaryKey(),
+  invitingUserId: text('inviting_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  invitedUserEmail: text('invited_user_email').notNull(),
+  propertyId: integer('property_id')
+    .notNull()
+    .references(() => property.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});

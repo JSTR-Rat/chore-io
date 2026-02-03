@@ -15,11 +15,13 @@ import { Route as SignoutRouteImport } from './routes/signout'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedInviteRouteImport } from './routes/_authed.invite'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed.dashboard'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed.dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedDashboardPropertyIdRouteImport } from './routes/_authed.dashboard/$propertyId'
 import { Route as AuthedDashboardPropertyIdIndexRouteImport } from './routes/_authed.dashboard/$propertyId/index'
+import { Route as AuthedDashboardPropertyIdInviteRouteImport } from './routes/_authed.dashboard/$propertyId/invite'
 import { Route as AuthedDashboardPropertyIdFloorplanEditRouteImport } from './routes/_authed.dashboard/$propertyId/floorplan.edit'
 import { Route as AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/index'
 import { Route as AuthedDashboardPropertyIdRoomRoomIdNewRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/new'
@@ -54,6 +56,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedInviteRoute = AuthedInviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -79,6 +86,12 @@ const AuthedDashboardPropertyIdIndexRoute =
   AuthedDashboardPropertyIdIndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
+const AuthedDashboardPropertyIdInviteRoute =
+  AuthedDashboardPropertyIdInviteRouteImport.update({
+    id: '/invite',
+    path: '/invite',
     getParentRoute: () => AuthedDashboardPropertyIdRoute,
   } as any)
 const AuthedDashboardPropertyIdFloorplanEditRoute =
@@ -113,9 +126,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/verify': typeof VerifyRoute
   '/dashboard': typeof AuthedDashboardRouteWithChildren
+  '/invite': typeof AuthedInviteRoute
   '/dashboard/$propertyId': typeof AuthedDashboardPropertyIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
+  '/dashboard/$propertyId/invite': typeof AuthedDashboardPropertyIdInviteRoute
   '/dashboard/$propertyId/': typeof AuthedDashboardPropertyIdIndexRoute
   '/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
   '/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
@@ -128,8 +143,10 @@ export interface FileRoutesByTo {
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
   '/verify': typeof VerifyRoute
+  '/invite': typeof AuthedInviteRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
+  '/dashboard/$propertyId/invite': typeof AuthedDashboardPropertyIdInviteRoute
   '/dashboard/$propertyId': typeof AuthedDashboardPropertyIdIndexRoute
   '/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
   '/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
@@ -145,9 +162,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/verify': typeof VerifyRoute
   '/_authed/dashboard': typeof AuthedDashboardRouteWithChildren
+  '/_authed/invite': typeof AuthedInviteRoute
   '/_authed/dashboard/$propertyId': typeof AuthedDashboardPropertyIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
+  '/_authed/dashboard/$propertyId/invite': typeof AuthedDashboardPropertyIdInviteRoute
   '/_authed/dashboard/$propertyId/': typeof AuthedDashboardPropertyIdIndexRoute
   '/_authed/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
   '/_authed/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
@@ -163,9 +182,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify'
     | '/dashboard'
+    | '/invite'
     | '/dashboard/$propertyId'
     | '/api/auth/$'
     | '/dashboard/'
+    | '/dashboard/$propertyId/invite'
     | '/dashboard/$propertyId/'
     | '/dashboard/$propertyId/floorplan/edit'
     | '/dashboard/$propertyId/room/$roomId/new'
@@ -178,8 +199,10 @@ export interface FileRouteTypes {
     | '/signout'
     | '/signup'
     | '/verify'
+    | '/invite'
     | '/api/auth/$'
     | '/dashboard'
+    | '/dashboard/$propertyId/invite'
     | '/dashboard/$propertyId'
     | '/dashboard/$propertyId/floorplan/edit'
     | '/dashboard/$propertyId/room/$roomId/new'
@@ -194,9 +217,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify'
     | '/_authed/dashboard'
+    | '/_authed/invite'
     | '/_authed/dashboard/$propertyId'
     | '/api/auth/$'
     | '/_authed/dashboard/'
+    | '/_authed/dashboard/$propertyId/invite'
     | '/_authed/dashboard/$propertyId/'
     | '/_authed/dashboard/$propertyId/floorplan/edit'
     | '/_authed/dashboard/$propertyId/room/$roomId/new'
@@ -258,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/invite': {
+      id: '/_authed/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof AuthedInviteRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
       path: '/dashboard'
@@ -293,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardPropertyIdIndexRouteImport
       parentRoute: typeof AuthedDashboardPropertyIdRoute
     }
+    '/_authed/dashboard/$propertyId/invite': {
+      id: '/_authed/dashboard/$propertyId/invite'
+      path: '/invite'
+      fullPath: '/dashboard/$propertyId/invite'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdInviteRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
     '/_authed/dashboard/$propertyId/floorplan/edit': {
       id: '/_authed/dashboard/$propertyId/floorplan/edit'
       path: '/floorplan/edit'
@@ -325,6 +364,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedDashboardPropertyIdRouteChildren {
+  AuthedDashboardPropertyIdInviteRoute: typeof AuthedDashboardPropertyIdInviteRoute
   AuthedDashboardPropertyIdIndexRoute: typeof AuthedDashboardPropertyIdIndexRoute
   AuthedDashboardPropertyIdFloorplanEditRoute: typeof AuthedDashboardPropertyIdFloorplanEditRoute
   AuthedDashboardPropertyIdRoomRoomIdNewRoute: typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
@@ -334,6 +374,7 @@ interface AuthedDashboardPropertyIdRouteChildren {
 
 const AuthedDashboardPropertyIdRouteChildren: AuthedDashboardPropertyIdRouteChildren =
   {
+    AuthedDashboardPropertyIdInviteRoute: AuthedDashboardPropertyIdInviteRoute,
     AuthedDashboardPropertyIdIndexRoute: AuthedDashboardPropertyIdIndexRoute,
     AuthedDashboardPropertyIdFloorplanEditRoute:
       AuthedDashboardPropertyIdFloorplanEditRoute,
@@ -366,10 +407,12 @@ const AuthedDashboardRouteWithChildren = AuthedDashboardRoute._addFileChildren(
 
 interface AuthedRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRouteWithChildren
+  AuthedInviteRoute: typeof AuthedInviteRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRouteWithChildren,
+  AuthedInviteRoute: AuthedInviteRoute,
 }
 
 const AuthedRouteWithChildren =

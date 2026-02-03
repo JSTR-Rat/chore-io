@@ -1,23 +1,24 @@
-import { authClient } from '@/lib/auth-client'
-import { getSessionData, requireAuth } from '@/utils/auth.functions'
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { Bars3 } from '@/components/icons/bars-3';
+import { authClient } from '@/lib/auth-client';
+import { getSessionData, requireAuth } from '@/utils/auth.functions';
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authed')({
   beforeLoad: async ({ location }) => {
-    console.log('[AUTHED] beforeLoad', location.pathname)
-    await requireAuth({ data: { currentPath: location.pathname } })
+    console.log('[AUTHED] beforeLoad', location.pathname);
+    await requireAuth({ data: { currentPath: location.href } });
   },
   loader: async (ctx) => {
     // Fetch session data for the component
-    const session = await getSessionData()
-    const isAdmin = session?.user?.role === 'admin'
-    return { session, isAdmin }
+    const session = await getSessionData();
+    const isAdmin = session?.user?.role === 'admin';
+    return { session, isAdmin };
   },
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  const { session, isAdmin } = Route.useLoaderData()
+  const { session, isAdmin } = Route.useLoaderData();
   return (
     <>
       <nav className="sticky top-0 z-10 border-b border-border bg-surface backdrop-blur-sm">
@@ -44,5 +45,5 @@ function RouteComponent() {
       </nav>
       <Outlet />
     </>
-  )
+  );
 }

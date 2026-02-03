@@ -1,8 +1,8 @@
-import { authClient } from '@/lib/auth-client'
-import { useForm } from '@tanstack/react-form'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { z } from 'zod'
+import { authClient } from '@/lib/auth-client';
+import { useForm } from '@tanstack/react-form';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { z } from 'zod';
 import {
   AuthFormLayout,
   AuthFormShell,
@@ -10,8 +10,8 @@ import {
   FormField,
   ServerError,
   AuthSubmitButton,
-} from '@/components/auth'
-import { getSessionData } from '@/utils/auth.functions'
+} from '@/components/auth';
+import { getSessionData } from '@/utils/auth.functions';
 
 // Zod schema for signup validation
 const signupSchema = z.object({
@@ -24,26 +24,30 @@ const signupSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .max(100, 'Password is too long'),
-})
+});
 
-type SignupFormValues = z.infer<typeof signupSchema>
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
-  beforeLoad: async () => {
-    const session = await getSessionData()
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
+  beforeLoad: async ({ search }) => {
+    const session = await getSessionData();
     if (session?.user && !session.user.emailVerified) {
-      throw redirect({ to: '/verify' })
+      throw redirect({ to: '/verify', search: { redirect: search.redirect } });
     }
     if (session?.user) {
-      throw redirect({ to: '/dashboard' })
+      throw redirect({ to: search.redirect || '/dashboard' });
     }
   },
-})
+});
 
 function SignupPage() {
-  const navigate = useNavigate()
-  const [serverError, setServerError] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const search = Route.useSearch();
 
   const form = useForm({
     defaultValues: {
@@ -56,20 +60,20 @@ function SignupPage() {
     },
     onSubmit: async ({ value }) => {
       try {
-        setServerError(null)
+        setServerError(null);
 
         // Sign up using better-auth
         const { data, error } = await authClient.signUp.email({
           name: value.name,
           email: value.email,
           password: value.password,
-        })
+        });
 
         if (error) {
           setServerError(
             error.message || 'Failed to create account. Please try again.',
-          )
-          return
+          );
+          return;
         }
 
         if (data) {
@@ -77,20 +81,20 @@ function SignupPage() {
             await authClient.emailOtp.sendVerificationOtp({
               email: value.email,
               type: 'email-verification',
-            })
+            });
           } catch (err) {
-            console.error('Error sending verification OTP:', err)
+            console.error('Error sending verification OTP:', err);
           } finally {
             // Successful signup - redirect to verify page for email verification
-            navigate({ to: '/verify' })
+            navigate({ to: '/verify', search: { redirect: search.redirect } });
           }
         }
       } catch (err) {
-        console.error('Signup error:', err)
-        setServerError('An unexpected error occurred. Please try again later.')
+        console.error('Signup error:', err);
+        setServerError('An unexpected error occurred. Please try again later.');
       }
     },
-  })
+  });
 
   return (
     <AuthFormLayout
@@ -99,9 +103,9 @@ function SignupPage() {
     >
       <AuthFormShell
         onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          form.handleSubmit()
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
         }}
       >
         <ServerError error={serverError} />
@@ -166,10 +170,12 @@ function SignupPage() {
         {/* Sign In Link */}
         <AuthFormLink
           text="Already have an account?"
-          linkText="Sign in"
-          href="/signin"
-        />
+          to="/signin"
+          search={{ redirect: search.redirect }}
+        >
+          Sign in
+        </AuthFormLink>
       </AuthFormShell>
     </AuthFormLayout>
-  )
+  );
 }

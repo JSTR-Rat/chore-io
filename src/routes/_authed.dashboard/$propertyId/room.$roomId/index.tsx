@@ -1,193 +1,38 @@
-import { ChoresBoard } from '@/components/ChoresBoard'
-import { DebugDateControls } from '@/components/DebugDateControls'
-import { useCurrentDate, useDebugDate } from '@/contexts/DebugDateContext'
-import { getDB } from '@/db/client'
-import { chore, choreHistory, room } from '@/db/schema/app'
-import type { Point } from '@/types/floorplan'
-import { getSessionData } from '@/utils/auth.functions'
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { desc, eq } from 'drizzle-orm'
-import { useState } from 'react'
+import { ChoresBoard } from '@/components/ChoresBoard';
+import { DebugDateControls } from '@/components/DebugDateControls';
+import { useCurrentDate, useDebugDate } from '@/contexts/DebugDateContext';
+import {
+  clearChoreHistory,
+  createChore,
+  deleteChore,
+  markChoreDone,
+  updateChore,
+} from '@/utils/chore.functions';
+import { loadRoom } from '@/utils/room.functions';
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
+import { useState } from 'react';
 
 // Types
 interface ChoreData {
-  id: string
-  name: string
-  frequency: number
-  frequencyUnit: 'days' | 'weeks' | 'months'
-  lastCompletedDate: Date | null
+  id: string;
+  name: string;
+  frequency: number;
+  frequencyUnit: 'days' | 'weeks' | 'months';
+  lastCompletedDate: Date | null;
 }
-
-interface CreateChoreInput {
-  roomId: number
-  name: string
-  frequency: number
-  frequencyUnit: 'days' | 'weeks' | 'months'
-}
-
-interface UpdateChoreInput {
-  choreId: number
-  name: string
-  frequency: number
-  frequencyUnit: 'days' | 'weeks' | 'months'
-}
-
-// Server function to load room data and chores
-const loadRoom = createServerFn({ method: 'GET' })
-  .inputValidator((data: number) => data)
-  .handler(async ({ data: roomId }) => {
-    const db = getDB()
-
-    const [roomData] = await db
-      .select({
-        id: room.id,
-        name: room.name,
-        points: room.points,
-        propertyId: room.propertyId,
-      })
-      .from(room)
-      .where(eq(room.id, roomId))
-
-    if (!roomData) {
-      throw new Error('Room not found')
-    }
-
-    // Load chores for this room
-    const chores = await db
-      .select({
-        id: chore.id,
-        name: chore.name,
-        frequency: chore.frequency,
-        frequencyUnit: chore.frequencyUnit,
-      })
-      .from(chore)
-      .where(eq(chore.roomId, roomId))
-
-    // For each chore, get the most recent completion from history
-    const choresWithHistory = await Promise.all(
-      chores.map(async (c) => {
-        const [lastCompletion] = await db
-          .select({
-            completedAt: choreHistory.completedAt,
-          })
-          .from(choreHistory)
-          .where(eq(choreHistory.choreId, c.id))
-          .orderBy(desc(choreHistory.completedAt))
-          .limit(1)
-
-        return {
-          id: String(c.id),
-          name: c.name,
-          frequency: c.frequency,
-          frequencyUnit: c.frequencyUnit as 'days' | 'weeks' | 'months',
-          lastCompletedDate: lastCompletion?.completedAt || null,
-        }
-      }),
-    )
-
-    return {
-      room: {
-        id: String(roomData.id),
-        name: roomData.name,
-        points: (roomData.points as Point[] | null) || [],
-        propertyId: roomData.propertyId,
-      },
-      chores: choresWithHistory,
-    }
-  })
-
-// Server function to create a chore
-const createChore = createServerFn({ method: 'POST' })
-  .inputValidator((data: CreateChoreInput) => data)
-  .handler(async ({ data }) => {
-    const db = getDB()
-    await db.insert(chore).values({
-      roomId: data.roomId,
-      name: data.name,
-      frequency: data.frequency,
-      frequencyUnit: data.frequencyUnit,
-    })
-    return { success: true }
-  })
-
-// Server function to update a chore
-const updateChore = createServerFn({ method: 'POST' })
-  .inputValidator((data: UpdateChoreInput) => data)
-  .handler(async ({ data }) => {
-    const db = getDB()
-    await db
-      .update(chore)
-      .set({
-        name: data.name,
-        frequency: data.frequency,
-        frequencyUnit: data.frequencyUnit,
-        updatedAt: new Date(),
-      })
-      .where(eq(chore.id, data.choreId))
-    return { success: true }
-  })
-
-// Server function to delete a chore
-const deleteChore = createServerFn({ method: 'POST' })
-  .inputValidator((data: number) => data)
-  .handler(async ({ data: choreId }) => {
-    const db = getDB()
-    await db.delete(chore).where(eq(chore.id, choreId))
-    return { success: true }
-  })
-
-// Server function to mark a chore as done
-const markChoreDone = createServerFn({ method: 'POST' })
-  .inputValidator((data: { choreId: number; completedAt: Date }) => data)
-  .handler(async ({ data }) => {
-    const session = await getSessionData()
-    if (!session?.user) {
-      throw new Error('Not authenticated')
-    }
-
-    const db = getDB()
-
-    // Insert a new completion record in choreHistory
-    // Use the provided completedAt date (which could be a debug date for admins)
-    await db.insert(choreHistory).values({
-      choreId: data.choreId,
-      userId: session.user.id,
-      completedAt: data.completedAt,
-    })
-
-    return { success: true }
-  })
-
-// Server function to clear chore history (admin/debug only)
-const clearChoreHistory = createServerFn({ method: 'POST' })
-  .inputValidator((data: number) => data)
-  .handler(async ({ data: choreId }) => {
-    const session = await getSessionData()
-    if (!session?.user) {
-      throw new Error('Not authenticated')
-    }
-
-    const db = getDB()
-
-    // Delete all history records for this chore
-    await db.delete(choreHistory).where(eq(choreHistory.choreId, choreId))
-
-    return { success: true }
-  })
 
 export const Route = createFileRoute(
   '/_authed/dashboard/$propertyId/room/$roomId/',
 )({
   loader: async ({ params }) => {
-    const roomId = parseInt(params.roomId, 10)
+    const roomId = parseInt(params.roomId, 10);
     if (isNaN(roomId)) {
-      throw new Error('Invalid room ID')
+      throw new Error('Invalid room ID');
     }
-    return await loadRoom({ data: roomId })
+    return await loadRoom({ data: roomId });
   },
   component: RoomComponent,
-})
+});
 
 // Modal Component for Add/Edit Chore
 function ChoreModal({
@@ -198,57 +43,65 @@ function ChoreModal({
   onSave,
   onDelete,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  chore?: ChoreData
-  roomId: number
-  onSave: () => void
-  onDelete?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  chore?: ChoreData;
+  roomId: number;
+  onSave: () => void;
+  onDelete?: () => void;
 }) {
-  const [name, setName] = useState(chore?.name || '')
-  const [frequency, setFrequency] = useState(chore?.frequency || 1)
+  const [name, setName] = useState(chore?.name || '');
+  const [frequency, setFrequency] = useState(chore?.frequency || 1);
   const [frequencyUnit, setFrequencyUnit] = useState<
     'days' | 'weeks' | 'months'
-  >(chore?.frequencyUnit || 'weeks')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  >(chore?.frequencyUnit || 'weeks');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsSubmitting(true)
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
 
     try {
       if (chore) {
         // Update existing chore
-        await updateChore({
+        const updateResult = await updateChore({
           data: {
             choreId: parseInt(chore.id),
             name,
             frequency,
             frequencyUnit,
           },
-        })
+        });
+        if (!updateResult.success) {
+          setError(updateResult.error || 'Failed to update chore');
+          return;
+        }
       } else {
         // Create new chore
-        await createChore({
+        const createResult = await createChore({
           data: {
             roomId,
             name,
             frequency,
             frequencyUnit,
           },
-        })
+        });
+        if (!createResult.success) {
+          setError(createResult.error || 'Failed to create chore');
+          return;
+        }
       }
-      onSave()
+      onSave();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save chore')
+      setError(err instanceof Error ? err.message : 'Failed to save chore');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div
@@ -357,7 +210,7 @@ function ChoreModal({
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 // Delete Confirmation Dialog
@@ -366,11 +219,11 @@ function DeleteConfirmDialog({
   onClose,
   onConfirm,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
 }) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
@@ -402,75 +255,89 @@ function DeleteConfirmDialog({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function RoomComponent() {
-  const { room, chores } = Route.useLoaderData()
-  const { propertyId } = Route.useParams()
-  const router = useRouter()
+  const { room, chores } = Route.useLoaderData();
+  const { propertyId } = Route.useParams();
+  const router = useRouter();
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [selectedChore, setSelectedChore] = useState<ChoreData | undefined>()
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedChore, setSelectedChore] = useState<ChoreData | undefined>();
 
   // Get the current date (either debug date for admins or real date)
-  const currentDate = useCurrentDate()
-  const { isEnabled: isDebugDateEnabled, formatDate } = useDebugDate()
+  const currentDate = useCurrentDate();
+  const { isEnabled: isDebugDateEnabled, formatDate } = useDebugDate();
 
   // Check if we're using a debug date (not today)
   const isUsingDebugDate =
     isDebugDateEnabled &&
-    currentDate.toDateString() !== new Date().toDateString()
+    currentDate.toDateString() !== new Date().toDateString();
 
   const handleChoreClick = (choreId: string) => {
-    const chore = chores.find((c) => c.id === choreId)
+    const chore = chores.find((c) => c.id === choreId);
     if (chore) {
-      setSelectedChore(chore)
-      setIsModalOpen(true)
+      setSelectedChore(chore);
+      setIsModalOpen(true);
     }
-  }
+  };
 
   const handleAddChore = () => {
-    setSelectedChore(undefined)
-    setIsModalOpen(true)
-  }
+    setSelectedChore(undefined);
+    setIsModalOpen(true);
+  };
 
   const handleSave = () => {
-    setIsModalOpen(false)
-    setSelectedChore(undefined)
-    router.invalidate()
-  }
+    setIsModalOpen(false);
+    setSelectedChore(undefined);
+    router.invalidate();
+  };
 
   const handleDeleteClick = () => {
-    setIsModalOpen(false)
-    setIsDeleteDialogOpen(true)
-  }
+    setIsModalOpen(false);
+    setIsDeleteDialogOpen(true);
+  };
 
   const handleDeleteConfirm = async () => {
     if (selectedChore) {
-      await deleteChore({ data: parseInt(selectedChore.id) })
-      setIsDeleteDialogOpen(false)
-      setSelectedChore(undefined)
-      router.invalidate()
+      const deleteResult = await deleteChore({
+        data: parseInt(selectedChore.id),
+      });
+      if (!deleteResult.success) {
+        console.error('Failed to delete chore:', deleteResult.error);
+        return;
+      }
+      setIsDeleteDialogOpen(false);
+      setSelectedChore(undefined);
+      router.invalidate();
     }
-  }
+  };
 
   const handleMarkDone = async (choreId: string) => {
     // Use the current date, which could be the debug date for admins
-    await markChoreDone({
+    const markResult = await markChoreDone({
       data: {
         choreId: parseInt(choreId),
         completedAt: currentDate,
       },
-    })
-    router.invalidate()
-  }
+    });
+    if (!markResult.success) {
+      console.error('Failed to mark chore as done:', markResult.error);
+      return;
+    }
+    router.invalidate();
+  };
 
   const handleClearHistory = async (choreId: string) => {
-    await clearChoreHistory({ data: parseInt(choreId) })
-    router.invalidate()
-  }
+    const clearResult = await clearChoreHistory({ data: parseInt(choreId) });
+    if (!clearResult.success) {
+      console.error('Failed to clear chore history:', clearResult.error);
+      return;
+    }
+    router.invalidate();
+  };
 
   return (
     <div className="space-y-6">
@@ -559,8 +426,8 @@ function RoomComponent() {
       <ChoreModal
         isOpen={isModalOpen}
         onClose={() => {
-          setIsModalOpen(false)
-          setSelectedChore(undefined)
+          setIsModalOpen(false);
+          setSelectedChore(undefined);
         }}
         chore={selectedChore}
         roomId={parseInt(room.id)}
@@ -574,5 +441,5 @@ function RoomComponent() {
         onConfirm={handleDeleteConfirm}
       />
     </div>
-  )
+  );
 }
