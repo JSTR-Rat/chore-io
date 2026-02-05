@@ -1,6 +1,8 @@
 // src/components/ChoresBoard.tsx
-import { getChoreColor } from '../utils/chore-colors'
-import clsx from 'clsx'
+import { Button } from '@headlessui/react';
+import { getChoreColor } from '../utils/chore-colors';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 
 // Constants for sizing
 const DIMENSIONS = {
@@ -9,45 +11,47 @@ const DIMENSIONS = {
   GAP_MOBILE: 6, // gap-1.5
   GAP_DESKTOP: 8, // gap-2
   FINAL_WEEK_DAYS: 7,
-} as const
+} as const;
 
 // Calculated widths
 const SQUISHED_BAR_WIDTH = {
   mobile: 62, // (2 * 28) + 6
   desktop: 72, // (2 * 32) + 8
-}
+};
 
 const FULL_BAR_WIDTH = {
   mobile: 300, // 62 + (7 * 28) + (7 * 6)
   desktop: 352, // 72 + (7 * 32) + (7 * 8)
-}
+};
 
-const MAX_FILL_PERCENT = 79.3 // Percentage of bar before final week section
+const MAX_FILL_PERCENT = 79.3; // Percentage of bar before final week section
 
 interface Chore {
-  id: string
-  name: string
-  lastCompletedDate: Date | null
-  frequency: number
-  frequencyUnit: 'days' | 'weeks' | 'months'
+  id: number;
+  name: string;
+  lastCompletedDate: Date | null;
+  frequency: number;
+  frequencyUnit: 'days' | 'weeks' | 'months';
 }
 
 interface ChoresBoardProps {
-  chores: Chore[]
-  onChoreClick: (choreId: string) => void
-  currentDate: Date
+  chores: Chore[];
+  onChoreClick: (choreId: number) => void;
+  onDeleteClick: (choreId: number) => void;
+  currentDate: Date;
 }
 
 export function ChoresBoard({
   chores,
   onChoreClick,
+  onDeleteClick,
   currentDate,
 }: ChoresBoardProps) {
   const calculateDaysSince = (lastCompleted: Date | null): number => {
-    if (!lastCompleted) return 999 // Never completed
-    const diffTime = currentDate.getTime() - lastCompleted.getTime()
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  }
+    if (!lastCompleted) return 999; // Never completed
+    const diffTime = currentDate.getTime() - lastCompleted.getTime();
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  };
 
   // Helper to convert frequency to days
   const frequencyToDays = (
@@ -56,13 +60,13 @@ export function ChoresBoard({
   ): number => {
     switch (unit) {
       case 'days':
-        return frequency
+        return frequency;
       case 'weeks':
-        return frequency * 7
+        return frequency * 7;
       case 'months':
-        return frequency * 30
+        return frequency * 30;
     }
-  }
+  };
 
   // Render progress bar for long-duration chores
   const renderProgressBar = (
@@ -84,7 +88,7 @@ export function ChoresBoard({
     // } else {
     //   progress = Math.min((daysSinceLastDone / totalDaysInBar) * 100, 100)
     // }
-    const progress = Math.min((daysSinceLastDone / totalDaysInBar) * 100, 100)
+    const progress = Math.min((daysSinceLastDone / totalDaysInBar) * 100, 100);
 
     return (
       <>
@@ -140,8 +144,8 @@ export function ChoresBoard({
           </div>
         </div>
       </>
-    )
-  }
+    );
+  };
 
   // Render individual day squares
   const renderDaySquares = (
@@ -151,8 +155,8 @@ export function ChoresBoard({
     choreColor: string,
   ) => {
     return Array.from({ length: numSquares }).map((_, idx) => {
-      const dayStart = startDay + idx
-      const dayEnd = dayStart + 1
+      const dayStart = startDay + idx;
+      const dayEnd = dayStart + 1;
 
       return (
         <span
@@ -163,21 +167,21 @@ export function ChoresBoard({
               daysSinceLastDone >= dayEnd ? choreColor : 'transparent',
           }}
         />
-      )
-    })
-  }
+      );
+    });
+  };
 
   return (
     <>
       {chores.map((chore) => {
-        const rawDaysSince = calculateDaysSince(chore.lastCompletedDate)
+        const rawDaysSince = calculateDaysSince(chore.lastCompletedDate);
         // If completed in the future, treat as clean (0 days since)
-        const daysSinceLastDone = Math.max(0, rawDaysSince)
-        const totalDays = frequencyToDays(chore.frequency, chore.frequencyUnit)
-        const daysRemaining = totalDays - daysSinceLastDone
+        const daysSinceLastDone = Math.max(0, rawDaysSince);
+        const totalDays = frequencyToDays(chore.frequency, chore.frequencyUnit);
+        const daysRemaining = totalDays - daysSinceLastDone;
 
         // Calculate unified color for entire chore based on overall progress
-        const choreColor = getChoreColor(daysSinceLastDone, totalDays)
+        const choreColor = getChoreColor(daysSinceLastDone, totalDays);
 
         // Determine which display mode to use
         const displayMode =
@@ -186,7 +190,7 @@ export function ChoresBoard({
             ? 'progressBar'
             : totalDays <= DIMENSIONS.FINAL_WEEK_DAYS
               ? 'daySquares'
-              : 'hybrid'
+              : 'hybrid';
 
         return (
           <div key={chore.id} className="mb-1 py-2">
@@ -269,20 +273,34 @@ export function ChoresBoard({
                   </div>
                 )}
               </div>
+              <div className="flex flex-row gap-2">
+                <Button
+                  onClick={() => onChoreClick(chore.id)}
+                  className="shrink rounded-md border border-border-strong bg-surface-elevated p-2 text-xs font-medium text-text-muted transition-all hover:border-border-hover hover:bg-surface-hover hover:text-text"
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => onDeleteClick(chore.id)}
+                  className="shrink rounded-md border border-border-strong bg-surface-elevated p-2 text-xs font-medium text-text-muted transition-all hover:border-border-hover hover:bg-surface-hover hover:text-text"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-        )
+        );
       })}
     </>
-  )
+  );
 }
 
 function ChoreSubtext({
   daysSinceLastDone,
   totalDays,
 }: {
-  daysSinceLastDone: number
-  totalDays: number
+  daysSinceLastDone: number;
+  totalDays: number;
 }) {
   const daysRemaining = Math.max(0, totalDays - daysSinceLastDone);
   const weeksRemainingReal = daysRemaining / 7;
@@ -294,18 +312,14 @@ function ChoreSubtext({
       <div className="flex justify-center">
         {daysRemaining <= 0 ? (
           <b>Due</b>
-        ) :
-        monthsRemainingReal >= 1 ?
-        (
+        ) : monthsRemainingReal >= 1 ? (
           <span>
             Due in
             {monthsRemainingReal % 1 > 0 ? ' over ' : ''}
             <b className="px-1">{monthsRemaining}</b>
             month{monthsRemaining > 1 ? 's' : ''}
           </span>
-        ) :
-        weeksRemainingReal > 2 ? 
-        (
+        ) : weeksRemainingReal > 2 ? (
           <span>
             Due in
             {weeksRemainingReal % 1 > 0 ? ' over ' : ''}
@@ -324,5 +338,5 @@ function ChoreSubtext({
         <span>({monthsRemainingReal} months)</span> */}
       </div>
     </div>
-  )
+  );
 }

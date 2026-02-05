@@ -9,11 +9,18 @@ import type { Point, Room } from '@/types/floorplan';
 import { DebugDateControls } from '@/components/DebugDateControls';
 import { useCurrentDate } from '@/contexts/DebugDateContext';
 import { getChoreColor } from '@/utils/chore-colors';
+import z from 'zod';
 
 const parentRoute = getRouteApi('/_authed/dashboard/$propertyId');
 
+const PropertyParamsSchema = z.object({
+  propertyId: z.coerce.number(),
+});
+type PropertyParams = z.infer<typeof PropertyParamsSchema>;
+
 export const Route = createFileRoute('/_authed/dashboard/$propertyId/')({
   component: RouteComponent,
+  params: PropertyParamsSchema,
 });
 
 function RouteComponent() {
@@ -146,7 +153,7 @@ function RouteComponent() {
 type FloorPlanProps = {
   rooms: (Room & { color?: string })[];
   aspectRatio: number;
-  propertyId: string;
+  propertyId: number;
 };
 
 function normalizePoints(

@@ -1,15 +1,16 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { getDB } from '@/db/client'
-import { property, room, chore, choreHistory } from '@/db/schema/app'
-import { eq, desc, sql } from 'drizzle-orm'
-import type { Point } from '@/types/floorplan'
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { getDB } from '@/db/client';
+import { property, room, chore, choreHistory } from '@/db/schema/app';
+import { eq, desc, sql } from 'drizzle-orm';
+import type { Point } from '@/types/floorplan';
+import z from 'zod';
 
 // Server function to load property and floor plan data
 const loadPropertyFloorplan = createServerFn({ method: 'GET' })
-  .inputValidator((data: number) => data)
-  .handler(async ({ data: propertyId }) => {
-    const db = getDB()
+  .inputValidator(z.object({ propertyId: z.number() }))
+  .handler(async ({ data }) => {
+    const db = getDB();
 
     // Fetch property data
     const [propertyData] = await db
@@ -20,10 +21,10 @@ const loadPropertyFloorplan = createServerFn({ method: 'GET' })
         createdAt: property.createdAt,
       })
       .from(property)
-      .where(eq(property.id, propertyId))
+      .where(eq(property.id, data.propertyId));
 
     if (!propertyData) {
-      throw new Error('Property not found')
+      throw new Error('Property not found');
     }
 
     // Fetch all rooms for this property
@@ -34,7 +35,7 @@ const loadPropertyFloorplan = createServerFn({ method: 'GET' })
         points: room.points,
       })
       .from(room)
-      .where(eq(room.propertyId, propertyId))
+      .where(eq(room.propertyId, data.propertyId));
 
     // Fetch all chores with their most recent completion date
     const choresWithHistory = await db
@@ -51,7 +52,7 @@ const loadPropertyFloorplan = createServerFn({ method: 'GET' })
       })
       .from(chore)
       .innerJoin(room, eq(chore.roomId, room.id))
-      .where(eq(room.propertyId, propertyId))
+      .where(eq(room.propertyId, data.propertyId));
 
     return {
       property: propertyData,
@@ -67,21 +68,25 @@ const loadPropertyFloorplan = createServerFn({ method: 'GET' })
         frequencyUnit: c.frequencyUnit,
         lastCompletedAt: c.lastCompletedAt,
       })),
-    }
-  })
+    };
+  });
+
+const PropertyParamsSchema = z.object({
+  propertyId: z.coerce.number(),
+});
+type PropertyParams = z.infer<typeof PropertyParamsSchema>;
 
 export const Route = createFileRoute('/_authed/dashboard/$propertyId')({
+  params: PropertyParamsSchema,
   loader: async ({ params }) => {
-    const propertyId = parseInt(params.propertyId, 10)
-    if (isNaN(propertyId)) {
-      throw new Error('Invalid property ID')
-    }
-    return await loadPropertyFloorplan({ data: propertyId })
+    return await loadPropertyFloorplan({
+      data: { propertyId: params.propertyId },
+    });
   },
   component: RouteComponent,
   errorComponent: ErrorComponent,
   pendingComponent: LoadingComponent,
-})
+});
 
 function LoadingComponent() {
   return (
@@ -91,7 +96,7 @@ function LoadingComponent() {
         <p className="text-text-muted">Loading property...</p>
       </div>
     </div>
-  )
+  );
 }
 
 function ErrorComponent({ error }: { error: Error }) {
@@ -110,12 +115,12 @@ function ErrorComponent({ error }: { error: Error }) {
         </Link>
       </div>
     </div>
-  )
+  );
 }
 
 function RouteComponent() {
-  const data = Route.useLoaderData()
-  const { propertyId } = Route.useParams()
+  const data = Route.useLoaderData();
+  const { propertyId } = Route.useParams();
 
-  return <Outlet />
+  return <Outlet />;
 }

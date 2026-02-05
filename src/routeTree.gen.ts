@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyRouteImport } from './routes/verify'
+import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SignoutRouteImport } from './routes/signout'
 import { Route as SigninRouteImport } from './routes/signin'
@@ -30,6 +31,11 @@ import { Route as AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRouteImport } fr
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnauthorizedRoute = UnauthorizedRouteImport.update({
+  id: '/unauthorized',
+  path: '/unauthorized',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/verify': typeof VerifyRoute
   '/dashboard': typeof AuthedDashboardRouteWithChildren
   '/invite': typeof AuthedInviteRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/verify': typeof VerifyRoute
   '/invite': typeof AuthedInviteRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signout': typeof SignoutRoute
   '/signup': typeof SignupRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/verify': typeof VerifyRoute
   '/_authed/dashboard': typeof AuthedDashboardRouteWithChildren
   '/_authed/invite': typeof AuthedInviteRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signout'
     | '/signup'
+    | '/unauthorized'
     | '/verify'
     | '/dashboard'
     | '/invite'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signout'
     | '/signup'
+    | '/unauthorized'
     | '/verify'
     | '/invite'
     | '/api/auth/$'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signout'
     | '/signup'
+    | '/unauthorized'
     | '/verify'
     | '/_authed/dashboard'
     | '/_authed/invite'
@@ -235,6 +247,7 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   SignoutRoute: typeof SignoutRoute
   SignupRoute: typeof SignupRoute
+  UnauthorizedRoute: typeof UnauthorizedRoute
   VerifyRoute: typeof VerifyRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -246,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/verify'
       fullPath: '/verify'
       preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unauthorized': {
+      id: '/unauthorized'
+      path: '/unauthorized'
+      fullPath: '/unauthorized'
+      preLoaderRoute: typeof UnauthorizedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -424,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   SignoutRoute: SignoutRoute,
   SignupRoute: SignupRoute,
+  UnauthorizedRoute: UnauthorizedRoute,
   VerifyRoute: VerifyRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
