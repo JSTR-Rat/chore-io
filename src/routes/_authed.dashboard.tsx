@@ -1,6 +1,11 @@
 import { getSessionData } from '@/utils/auth.functions';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { DebugDateProvider } from '@/contexts/DebugDateContext';
+import { retainSearchParams } from '@tanstack/react-router';
+import z from 'zod';
+
+const dateSearchSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+});
 
 type Session = {
   user: {
@@ -11,6 +16,10 @@ type Session = {
 };
 
 export const Route = createFileRoute('/_authed/dashboard')({
+  validateSearch: dateSearchSchema,
+  search: {
+    middlewares: [retainSearchParams(['date'])],
+  },
   component: DashboardPage,
   loader: async (ctx) => {
     // Fetch session data for the component
@@ -21,7 +30,7 @@ export const Route = createFileRoute('/_authed/dashboard')({
 });
 
 function DashboardPage() {
-  const { session, isAdmin } = Route.useLoaderData();
+  const { session } = Route.useLoaderData();
 
   // This shouldn't happen due to middleware, but add safety check
   if (!session) {
@@ -33,14 +42,10 @@ function DashboardPage() {
   }
 
   return (
-    <DebugDateProvider isAdmin={isAdmin}>
-      <div className="">
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {/* <div className="rounded-lg border border-border bg-surface p-6 shadow-lg backdrop-blur-sm"> */}
-          <Outlet />
-          {/* </div> */}
-        </main>
-      </div>
-    </DebugDateProvider>
+    <div className="">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Outlet />
+      </main>
+    </div>
   );
 }

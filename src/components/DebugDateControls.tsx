@@ -1,19 +1,56 @@
-import { useDebugDate } from '@/contexts/DebugDateContext'
+import {
+  useNavigate,
+  useSearch,
+  useLoaderData,
+  useRouter,
+} from '@tanstack/react-router';
+import { formatDateForParam, formatDateDisplay } from '@/utils/date';
 
 export function DebugDateControls() {
-  const {
-    debugDate,
-    isEnabled,
-    goToPreviousDay,
-    goToNextDay,
-    resetToToday,
-    formatDate,
-  } = useDebugDate()
+  const navigate = useNavigate();
+  const router = useRouter();
+  const search = useSearch({ from: '/_authed/dashboard' });
+  const { isAdmin } = useLoaderData({ from: '/_authed/dashboard' });
 
   // Don't render anything if not enabled (user is not admin)
-  if (!isEnabled) {
-    return null
+  if (!isAdmin) {
+    return null;
   }
+
+  const currentDate = search.date
+    ? new Date(search.date + 'T12:00:00')
+    : new Date();
+
+  const goToPreviousDay = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 1);
+    navigate({
+      to: '.',
+      search: (prev) => ({ ...prev, date: formatDateForParam(newDate) }),
+    });
+    router.invalidate();
+  };
+
+  const goToNextDay = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 1);
+    navigate({
+      to: '.',
+      search: (prev) => ({ ...prev, date: formatDateForParam(newDate) }),
+    });
+    router.invalidate();
+  };
+
+  const resetToToday = () => {
+    const today = formatDateForParam(new Date());
+    navigate({
+      to: '.',
+      search: (prev) => {
+        return { ...prev, date: today };
+      },
+    });
+    router.invalidate();
+  };
 
   return (
     <div className="mb-6 rounded-lg border-2 border-dashed border-yellow-500 bg-yellow-500/10 p-4">
@@ -36,7 +73,7 @@ export function DebugDateControls() {
           ← Previous Day
         </button>
         <div className="min-w-[200px] text-center text-base font-semibold text-text">
-          {formatDate(debugDate)}
+          {formatDateDisplay(currentDate)}
         </div>
         <button
           onClick={goToNextDay}
@@ -50,5 +87,5 @@ export function DebugDateControls() {
         completion
       </p>
     </div>
-  )
+  );
 }

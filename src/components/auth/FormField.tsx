@@ -1,12 +1,12 @@
-import type { AnyFieldApi } from '@tanstack/react-form'
-import { FieldError } from './FieldError'
+import type { AnyFieldApi } from '@tanstack/react-form';
+import { StandardFieldError } from '../standard-form/field-error';
 
 interface FormFieldProps {
-  field: AnyFieldApi
-  label: string
-  type?: 'text' | 'email' | 'password'
-  placeholder?: string
-  autoComplete?: string
+  field: AnyFieldApi;
+  label: string;
+  type?: 'text' | 'email' | 'password';
+  placeholder?: string;
+  autoComplete?: string;
   inputMode?:
     | 'text'
     | 'numeric'
@@ -15,8 +15,8 @@ interface FormFieldProps {
     | 'url'
     | 'search'
     | 'none'
-    | 'decimal'
-  maxLength?: number
+    | 'decimal';
+  maxLength?: number;
 }
 
 /**
@@ -33,7 +33,8 @@ export function FormField({
   maxLength,
 }: FormFieldProps) {
   const hasErrors =
-    field.state.meta.errors && field.state.meta.errors.length > 0
+    field.state.meta.errors && field.state.meta.errors.length > 0;
+  const isTouched = field.state.meta.isTouched;
 
   return (
     <div className="space-y-2">
@@ -55,12 +56,14 @@ export function FormField({
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         className={`w-full rounded-lg border bg-surface-input px-4 py-3 text-text placeholder-text-placeholder transition-all focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none ${
-          hasErrors ? 'border-error-border' : 'border-border-strong'
+          hasErrors && isTouched
+            ? 'border-error-border'
+            : 'border-border-strong'
         }`}
         aria-invalid={hasErrors}
         aria-describedby={hasErrors ? `${field.name}-error` : undefined}
       />
-      <FieldError field={field} />
+      <StandardFieldError field={field} />
     </div>
-  )
+  );
 }

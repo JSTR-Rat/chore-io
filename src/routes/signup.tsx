@@ -1,7 +1,7 @@
 import { authClient } from '@/lib/auth-client';
 import { useForm } from '@tanstack/react-form';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { z } from 'zod';
 import {
   AuthFormLayout,
@@ -12,6 +12,8 @@ import {
   AuthSubmitButton,
 } from '@/components/auth';
 import { getSessionData } from '@/utils/auth.functions';
+import { StandardFormFieldTurnstile } from '@/components/standard-form/field-turnstile';
+import { TurnstileInstance } from '@marsidev/react-turnstile';
 
 // Zod schema for signup validation
 const signupSchema = z.object({
@@ -24,6 +26,7 @@ const signupSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .max(100, 'Password is too long'),
+  turnstile: z.string().min(1, 'Turnstile is required'),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -54,6 +57,7 @@ function SignupPage() {
       name: '',
       email: '',
       password: '',
+      turnstile: '',
     } as SignupFormValues,
     validators: {
       onChange: signupSchema,
@@ -67,6 +71,11 @@ function SignupPage() {
           name: value.name,
           email: value.email,
           password: value.password,
+          fetchOptions: {
+            headers: {
+              'x-captcha-response': value.turnstile,
+            },
+          },
         });
 
         if (error) {
@@ -149,16 +158,23 @@ function SignupPage() {
           )}
         </form.Field>
 
+        <form.Field name="turnstile">
+          {(field) => (
+            <StandardFormFieldTurnstile field={field} action="signup" />
+          )}
+        </form.Field>
+
         {/* Submit Button */}
         <form.Subscribe
           selector={(state) => ({
             canSubmit: state.canSubmit,
             isSubmitting: state.isSubmitting,
+            isTouched: state.isTouched,
           })}
         >
-          {({ canSubmit, isSubmitting }) => (
+          {({ canSubmit, isSubmitting, isTouched }) => (
             <AuthSubmitButton
-              canSubmit={canSubmit}
+              canSubmit={canSubmit && isTouched}
               isSubmitting={isSubmitting}
               loadingText="Creating account..."
             >

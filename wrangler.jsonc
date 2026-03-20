@@ -43,6 +43,12 @@
           "migrations_dir": "drizzle",
         },
       ],
+      "observability": {
+        "enabled": true,
+        "logs": {
+          "enabled": true,
+        },
+      },
     },
   },
 }

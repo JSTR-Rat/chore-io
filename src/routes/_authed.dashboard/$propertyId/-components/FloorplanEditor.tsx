@@ -44,7 +44,49 @@ export function FloorplanEditor({
   const [isDrawing, setIsDrawing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(
+    null,
+  )
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const deletedRoomIdsRef = useRef<Set<string>>(new Set())
+
+  // Revoke object URL on unmount or when clearing to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (backgroundImageUrl) {
+        URL.revokeObjectURL(backgroundImageUrl)
+      }
+    }
+  }, [backgroundImageUrl])
+
+  const handleSelectBackgroundImage = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  const handleBackgroundImageChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      if (!file.type.startsWith('image/')) return
+
+      // Revoke previous URL if any
+      if (backgroundImageUrl) {
+        URL.revokeObjectURL(backgroundImageUrl)
+      }
+
+      const url = URL.createObjectURL(file)
+      setBackgroundImageUrl(url)
+      e.target.value = ''
+    },
+    [backgroundImageUrl],
+  )
+
+  const handleRemoveBackgroundImage = useCallback(() => {
+    if (backgroundImageUrl) {
+      URL.revokeObjectURL(backgroundImageUrl)
+      setBackgroundImageUrl(null)
+    }
+  }, [backgroundImageUrl])
 
   // Track if there are unsaved changes
   const hasUnsavedChanges = useRef(false)
@@ -151,6 +193,13 @@ export function FloorplanEditor({
       {/* Header with actions */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleBackgroundImageChange}
+          />
           <button
             onClick={addRoom}
             className="rounded-lg bg-linear-to-r from-primary-from to-primary-to px-4 py-2 text-sm font-semibold text-text shadow-lg shadow-primary-shadow transition-all duration-200 hover:from-primary-from-hover hover:to-primary-to-hover hover:shadow-primary-shadow-hover disabled:cursor-not-allowed disabled:opacity-50 sm:py-3 sm:text-base"
@@ -158,6 +207,21 @@ export function FloorplanEditor({
           >
             Add Room
           </button>
+          {backgroundImageUrl ? (
+            <button
+              onClick={handleRemoveBackgroundImage}
+              className="rounded-lg border border-border-strong bg-surface-elevated px-4 py-2 text-sm font-medium text-text transition-all duration-200 hover:border-border-hover hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50 sm:py-3 sm:text-base"
+            >
+              Remove image
+            </button>
+          ) : (
+            <button
+              onClick={handleSelectBackgroundImage}
+              className="rounded-lg border border-border-strong bg-surface-elevated px-4 py-2 text-sm font-medium text-text-muted transition-all duration-200 hover:border-border-hover hover:bg-surface-hover hover:text-text disabled:cursor-not-allowed disabled:opacity-50 sm:py-3 sm:text-base"
+            >
+              Choose image
+            </button>
+          )}
           {isDrawing ? (
             <span className="text-xs text-text-subtle sm:text-sm">
               {isMobile ? 'Tap to place 3 points' : 'Click to place 3 points'}
@@ -195,6 +259,7 @@ export function FloorplanEditor({
           rooms={rooms}
           selectedRoomId={selectedRoomId}
           isDrawing={isDrawing}
+          backgroundImageUrl={backgroundImageUrl}
           onRoomSelect={setSelectedRoomId}
           onRoomUpdate={updateRoom}
           onDrawingComplete={() => setIsDrawing(false)}

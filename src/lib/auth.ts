@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
 import { getDB } from '@/db';
-import { admin, emailOTP } from 'better-auth/plugins';
+import { admin, captcha, emailOTP } from 'better-auth/plugins';
 import { Resend } from 'resend';
 import { waitUntil } from 'cloudflare:workers';
 import VerifyEmailTemplate from '@/emails/verify-email';
@@ -11,6 +11,9 @@ export const auth = betterAuth({
   database: drizzleAdapter(getDB(), {
     provider: 'sqlite',
   }),
+  trustedOrigins: [
+    'https://guarantees-architectural-balloon-pittsburgh.trycloudflare.com',
+  ],
   emailAndPassword: {
     enabled: true,
   },
@@ -30,6 +33,10 @@ export const auth = betterAuth({
         );
         console.log('Sending verification OTP to', email, otp, type);
       },
+    }),
+    captcha({
+      provider: 'cloudflare-turnstile',
+      secretKey: process.env.TURNSTILE_SECRET_KEY,
     }),
     tanstackStartCookies(), // Handle cookies automatically for TanStack Start
   ],

@@ -7,6 +7,7 @@ import { StandardFormShell } from '@/components/standard-form/shell';
 import { StandardSubmitButton } from '@/components/standard-form/submit-button';
 import { assertUserHasAccessToChore } from '@/utils/access.functions';
 import { getChore, updateChore } from '@/utils/chore.functions';
+import { getChoreOptions } from '@/utils/chore.queries';
 import { getRoomDetails } from '@/utils/room.functions';
 import { useForm } from '@tanstack/react-form';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
@@ -32,18 +33,11 @@ export const Route = createFileRoute(
 )({
   component: RouteComponent,
   params: EditChoreParamsSchema,
-  loader: async ({ params }) => {
-    const choreResult = await getChore({
-      data: {
-        propertyId: params.propertyId,
-        roomId: params.roomId,
-        choreId: params.choreId,
-      },
-    });
-    if (!choreResult.success) {
-      throw new Error(choreResult.error || 'Failed to get chore');
-    }
-    return { chore: choreResult.chore };
+  loader: async ({ params, context: { queryClient } }) => {
+    const chore = await queryClient.ensureQueryData(
+      getChoreOptions(params.choreId),
+    );
+    return { chore };
   },
 });
 

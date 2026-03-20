@@ -8,7 +8,9 @@ import {
   Scripts,
   Link,
   useRouter,
+  createRootRouteWithContext,
 } from '@tanstack/react-router';
+import { QueryClient } from '@tanstack/react-query';
 
 import appCSS from '../styles/app.css?url';
 
@@ -23,25 +25,27 @@ type RouteContext = {
   } | null;
 };
 
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'Chore IO',
-      },
-    ],
-    links: [{ rel: 'stylesheet', href: appCSS }],
-  }),
-  component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-});
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+  {
+    head: () => ({
+      meta: [
+        {
+          charSet: 'utf-8',
+        },
+        {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1',
+        },
+        {
+          title: 'Chore IO',
+        },
+      ],
+      links: [{ rel: 'stylesheet', href: appCSS }],
+    }),
+    component: RootComponent,
+    notFoundComponent: NotFoundComponent,
+  },
+);
 
 function RootComponent() {
   return (

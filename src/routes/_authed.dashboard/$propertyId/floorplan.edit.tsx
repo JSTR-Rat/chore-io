@@ -1,10 +1,10 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { getDB } from '@/db/client'
-import { property, room } from '@/db/schema/app'
-import { eq } from 'drizzle-orm'
-import { FloorplanEditor } from './-components/FloorplanEditor'
-import type { Point } from '@/types/floorplan'
-import { createServerFn } from '@tanstack/react-start'
+import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { getDB } from '@/db/client';
+import { property, room } from '@/db/schema/app';
+import { eq } from 'drizzle-orm';
+import { FloorplanEditor } from './-components/FloorplanEditor';
+import type { Point } from '@/types/floorplan';
+import { createServerFn } from '@tanstack/react-start';
 
 /**
  * Server function to load property floorplan data
@@ -12,7 +12,7 @@ import { createServerFn } from '@tanstack/react-start'
 const loadFloorplan = createServerFn({ method: 'GET' })
   .inputValidator((data: number) => data)
   .handler(async ({ data: propertyId }) => {
-    const db = getDB()
+    const db = getDB();
 
     // Fetch property with aspect ratio
     const [propertyData] = await db
@@ -22,10 +22,10 @@ const loadFloorplan = createServerFn({ method: 'GET' })
         aspectRatio: property.aspectRatio,
       })
       .from(property)
-      .where(eq(property.id, propertyId))
+      .where(eq(property.id, propertyId));
 
     if (!propertyData) {
-      throw new Error('Property not found')
+      throw new Error('Property not found');
     }
 
     // Fetch all rooms for this property
@@ -36,7 +36,7 @@ const loadFloorplan = createServerFn({ method: 'GET' })
         points: room.points,
       })
       .from(room)
-      .where(eq(room.propertyId, propertyId))
+      .where(eq(room.propertyId, propertyId));
 
     return {
       property: propertyData,
@@ -45,8 +45,8 @@ const loadFloorplan = createServerFn({ method: 'GET' })
         name: r.name,
         points: (r.points as Point[] | null) || [],
       })),
-    }
-  })
+    };
+  });
 
 /**
  * Server action to save floorplan changes
@@ -54,36 +54,36 @@ const loadFloorplan = createServerFn({ method: 'GET' })
 const saveFloorplan = createServerFn({ method: 'POST' })
   .inputValidator(
     (data: {
-      propertyId: number
-      aspectRatio: number
+      propertyId: number;
+      aspectRatio: number;
       rooms: Array<{
-        id: string
-        name: string
-        points: Point[]
-      }>
-      deletedRoomIds: string[]
+        id: string;
+        name: string;
+        points: Point[];
+      }>;
+      deletedRoomIds: string[];
     }) => data,
   )
   .handler(async ({ data }) => {
-    const db = getDB()
+    const db = getDB();
 
     // Update property aspect ratio
     await db
       .update(property)
       .set({ aspectRatio: data.aspectRatio })
-      .where(eq(property.id, data.propertyId))
+      .where(eq(property.id, data.propertyId));
 
     // Delete removed rooms
     for (const roomId of data.deletedRoomIds) {
-      const id = parseInt(roomId, 10)
+      const id = parseInt(roomId, 10);
       if (!isNaN(id)) {
-        await db.delete(room).where(eq(room.id, id))
+        await db.delete(room).where(eq(room.id, id));
       }
     }
 
     // Update or create rooms
     for (const roomData of data.rooms) {
-      const id = parseInt(roomData.id, 10)
+      const id = parseInt(roomData.id, 10);
 
       if (isNaN(id)) {
         // New room - create it
@@ -91,7 +91,7 @@ const saveFloorplan = createServerFn({ method: 'POST' })
           name: roomData.name,
           propertyId: data.propertyId,
           points: roomData.points as any,
-        })
+        });
       } else {
         // Existing room - update it
         await db
@@ -100,56 +100,56 @@ const saveFloorplan = createServerFn({ method: 'POST' })
             name: roomData.name,
             points: roomData.points as any,
           })
-          .where(eq(room.id, id))
+          .where(eq(room.id, id));
       }
     }
 
-    return { success: true }
-  })
+    return { success: true };
+  });
 
 export const Route = createFileRoute(
   '/_authed/dashboard/$propertyId/floorplan/edit',
 )({
   loader: async ({ params }) => {
-    const propertyId = parseInt(params.propertyId, 10)
-    return await loadFloorplan({ data: propertyId })
+    const propertyId = params.propertyId;
+    return await loadFloorplan({ data: propertyId });
   },
   component: FloorplanEditorRoute,
-})
+});
 
 function FloorplanEditorRoute() {
-  const data = Route.useLoaderData()
-  const navigate = Route.useNavigate()
-  const router = useRouter()
+  const data = Route.useLoaderData();
+  const navigate = Route.useNavigate();
+  const router = useRouter();
 
   const handleSave = async (floorplanData: {
-    aspectRatio: number
-    rooms: Array<{ id: string; name: string; points: Point[] }>
-    deletedRoomIds: string[]
+    aspectRatio: number;
+    rooms: Array<{ id: string; name: string; points: Point[] }>;
+    deletedRoomIds: string[];
   }) => {
     await saveFloorplan({
       data: {
         propertyId: data.property.id,
         ...floorplanData,
       },
-    })
+    });
 
     // Invalidate the route cache so fresh data is loaded next time
-    await router.invalidate()
+    await router.invalidate();
 
     // Navigate back to property view
     navigate({
       to: '/dashboard/$propertyId',
-      params: { propertyId: String(data.property.id) },
-    })
-  }
+      params: { propertyId: data.property.id },
+    });
+  };
 
   const handleCancel = () => {
     navigate({
       to: '/dashboard/$propertyId',
-      params: { propertyId: String(data.property.id) },
-    })
-  }
+      params: { propertyId: data.property.id },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background-gradient-start via-background-gradient-mid to-background-gradient-end p-3 sm:p-4 md:p-6">
@@ -171,5 +171,5 @@ function FloorplanEditorRoute() {
         />
       </div>
     </div>
-  )
+  );
 }

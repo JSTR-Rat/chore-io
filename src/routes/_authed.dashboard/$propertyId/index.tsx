@@ -7,25 +7,32 @@ import {
 import { useMemo } from 'react';
 import type { Point, Room } from '@/types/floorplan';
 import { DebugDateControls } from '@/components/DebugDateControls';
-import { useCurrentDate } from '@/contexts/DebugDateContext';
+import { useCurrentDate } from '@/hooks/useCurrentDate';
 import { getChoreColor } from '@/utils/chore-colors';
 import z from 'zod';
-
-const parentRoute = getRouteApi('/_authed/dashboard/$propertyId');
+import { InteractiveViewport } from '@/components/InteractiveViewport';
+import { getFloorplanOptions } from '@/utils/property.functions';
 
 const PropertyParamsSchema = z.object({
   propertyId: z.coerce.number(),
 });
-type PropertyParams = z.infer<typeof PropertyParamsSchema>;
 
 export const Route = createFileRoute('/_authed/dashboard/$propertyId/')({
   component: RouteComponent,
+  loader: async ({ params, context: { queryClient } }) => {
+    const floorplan = await queryClient.ensureQueryData(
+      getFloorplanOptions(params.propertyId),
+    );
+    return {
+      propertyId: params.propertyId,
+      floorplan,
+    };
+  },
   params: PropertyParamsSchema,
 });
 
 function RouteComponent() {
-  const data = parentRoute.useLoaderData();
-  const { propertyId } = Route.useParams();
+  const { floorplan: data, propertyId } = Route.useLoaderData();
   const currentDate = useCurrentDate();
 
   // Helper to convert frequency to days
@@ -124,11 +131,25 @@ function RouteComponent() {
 
         <div className="mb-6">
           {data.rooms.length > 0 ? (
-            <FloorPlan
-              rooms={roomsWithColors}
-              aspectRatio={data.property.aspectRatio || 1.5}
-              propertyId={propertyId}
-            />
+            <div className="aspect-square w-full rounded-lg border border-dashed border-border p-1 shadow-md backdrop-blur-sm">
+              <div className="h-full w-full overflow-hidden rounded-md">
+                <div className="h-full w-full p-1">
+                  <InteractiveViewport>
+                    {/* <img
+                src="https://picsum.photos/500"
+                alt="Viewport"
+                className="pointer-events-none h-full w-full select-none"
+                /> */}
+
+                    <FloorPlan
+                      rooms={roomsWithColors}
+                      aspectRatio={data.property.aspectRatio || 1.5}
+                      propertyId={propertyId}
+                    />
+                  </InteractiveViewport>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="rounded-lg border border-border bg-surface p-8 text-center shadow-lg">
               <p className="mb-4 text-text-muted">

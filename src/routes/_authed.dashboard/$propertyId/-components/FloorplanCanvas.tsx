@@ -3,10 +3,11 @@ import type { Room, Point } from '@/types/floorplan'
 import { isValidPoint } from '@/types/floorplan'
 import { applySnapping, DEFAULT_SNAPPING_CONFIG } from './floorplan-snapping'
 
-interface FloorplanCanvasProps {
+export interface FloorplanCanvasProps {
   rooms: Room[]
   selectedRoomId: string | null
   isDrawing: boolean
+  backgroundImageUrl?: string | null
   onRoomSelect: (roomId: string | null) => void
   onRoomUpdate: (roomId: string, updates: Partial<Room>) => void
   onDrawingComplete: () => void
@@ -16,6 +17,7 @@ export function FloorplanCanvas({
   rooms,
   selectedRoomId,
   isDrawing,
+  backgroundImageUrl,
   onRoomSelect,
   onRoomUpdate,
   onDrawingComplete,
@@ -550,6 +552,17 @@ export function FloorplanCanvas({
             )
           })()}
         </defs>
+        {backgroundImageUrl && (
+          <image
+            href={backgroundImageUrl}
+            x={0}
+            y={0}
+            width={viewBox.width}
+            height={viewBox.height}
+            preserveAspectRatio="xMidYMid meet"
+            data-background="true"
+          />
+        )}
         <rect
           width="100%"
           height="100%"

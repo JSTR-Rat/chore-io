@@ -23,6 +23,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedDashboardPropertyIdRouteImport } from './routes/_authed.dashboard/$propertyId'
 import { Route as AuthedDashboardPropertyIdIndexRouteImport } from './routes/_authed.dashboard/$propertyId/index'
 import { Route as AuthedDashboardPropertyIdInviteRouteImport } from './routes/_authed.dashboard/$propertyId/invite'
+import { Route as AuthedDashboardPropertyIdRoomRoomIdRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId'
 import { Route as AuthedDashboardPropertyIdFloorplanEditRouteImport } from './routes/_authed.dashboard/$propertyId/floorplan.edit'
 import { Route as AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/index'
 import { Route as AuthedDashboardPropertyIdRoomRoomIdNewRouteImport } from './routes/_authed.dashboard/$propertyId/room.$roomId/new'
@@ -100,6 +101,12 @@ const AuthedDashboardPropertyIdInviteRoute =
     path: '/invite',
     getParentRoute: () => AuthedDashboardPropertyIdRoute,
   } as any)
+const AuthedDashboardPropertyIdRoomRoomIdRoute =
+  AuthedDashboardPropertyIdRoomRoomIdRouteImport.update({
+    id: '/room/$roomId',
+    path: '/room/$roomId',
+    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+  } as any)
 const AuthedDashboardPropertyIdFloorplanEditRoute =
   AuthedDashboardPropertyIdFloorplanEditRouteImport.update({
     id: '/floorplan/edit',
@@ -108,21 +115,21 @@ const AuthedDashboardPropertyIdFloorplanEditRoute =
   } as any)
 const AuthedDashboardPropertyIdRoomRoomIdIndexRoute =
   AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport.update({
-    id: '/room/$roomId/',
-    path: '/room/$roomId/',
-    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedDashboardPropertyIdRoomRoomIdRoute,
   } as any)
 const AuthedDashboardPropertyIdRoomRoomIdNewRoute =
   AuthedDashboardPropertyIdRoomRoomIdNewRouteImport.update({
-    id: '/room/$roomId/new',
-    path: '/room/$roomId/new',
-    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthedDashboardPropertyIdRoomRoomIdRoute,
   } as any)
 const AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute =
   AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRouteImport.update({
-    id: '/room/$roomId/edit/$choreId',
-    path: '/room/$roomId/edit/$choreId',
-    getParentRoute: () => AuthedDashboardPropertyIdRoute,
+    id: '/edit/$choreId',
+    path: '/edit/$choreId',
+    getParentRoute: () => AuthedDashboardPropertyIdRoomRoomIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -140,8 +147,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/$propertyId/invite': typeof AuthedDashboardPropertyIdInviteRoute
   '/dashboard/$propertyId/': typeof AuthedDashboardPropertyIdIndexRoute
   '/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
+  '/dashboard/$propertyId/room/$roomId': typeof AuthedDashboardPropertyIdRoomRoomIdRouteWithChildren
   '/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
-  '/dashboard/$propertyId/room/$roomId': typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
+  '/dashboard/$propertyId/room/$roomId/': typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
   '/dashboard/$propertyId/room/$roomId/edit/$choreId': typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
 }
 export interface FileRoutesByTo {
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/_authed/dashboard/$propertyId/invite': typeof AuthedDashboardPropertyIdInviteRoute
   '/_authed/dashboard/$propertyId/': typeof AuthedDashboardPropertyIdIndexRoute
   '/_authed/dashboard/$propertyId/floorplan/edit': typeof AuthedDashboardPropertyIdFloorplanEditRoute
+  '/_authed/dashboard/$propertyId/room/$roomId': typeof AuthedDashboardPropertyIdRoomRoomIdRouteWithChildren
   '/_authed/dashboard/$propertyId/room/$roomId/new': typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
   '/_authed/dashboard/$propertyId/room/$roomId/': typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
   '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId': typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
@@ -199,8 +208,9 @@ export interface FileRouteTypes {
     | '/dashboard/$propertyId/invite'
     | '/dashboard/$propertyId/'
     | '/dashboard/$propertyId/floorplan/edit'
-    | '/dashboard/$propertyId/room/$roomId/new'
     | '/dashboard/$propertyId/room/$roomId'
+    | '/dashboard/$propertyId/room/$roomId/new'
+    | '/dashboard/$propertyId/room/$roomId/'
     | '/dashboard/$propertyId/room/$roomId/edit/$choreId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/_authed/dashboard/$propertyId/invite'
     | '/_authed/dashboard/$propertyId/'
     | '/_authed/dashboard/$propertyId/floorplan/edit'
+    | '/_authed/dashboard/$propertyId/room/$roomId'
     | '/_authed/dashboard/$propertyId/room/$roomId/new'
     | '/_authed/dashboard/$propertyId/room/$roomId/'
     | '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId'
@@ -292,7 +303,7 @@ declare module '@tanstack/react-router' {
     '/_authed': {
       id: '/_authed'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -352,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardPropertyIdInviteRouteImport
       parentRoute: typeof AuthedDashboardPropertyIdRoute
     }
+    '/_authed/dashboard/$propertyId/room/$roomId': {
+      id: '/_authed/dashboard/$propertyId/room/$roomId'
+      path: '/room/$roomId'
+      fullPath: '/dashboard/$propertyId/room/$roomId'
+      preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdRouteImport
+      parentRoute: typeof AuthedDashboardPropertyIdRoute
+    }
     '/_authed/dashboard/$propertyId/floorplan/edit': {
       id: '/_authed/dashboard/$propertyId/floorplan/edit'
       path: '/floorplan/edit'
@@ -361,35 +379,54 @@ declare module '@tanstack/react-router' {
     }
     '/_authed/dashboard/$propertyId/room/$roomId/': {
       id: '/_authed/dashboard/$propertyId/room/$roomId/'
-      path: '/room/$roomId'
-      fullPath: '/dashboard/$propertyId/room/$roomId'
+      path: '/'
+      fullPath: '/dashboard/$propertyId/room/$roomId/'
       preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdIndexRouteImport
-      parentRoute: typeof AuthedDashboardPropertyIdRoute
+      parentRoute: typeof AuthedDashboardPropertyIdRoomRoomIdRoute
     }
     '/_authed/dashboard/$propertyId/room/$roomId/new': {
       id: '/_authed/dashboard/$propertyId/room/$roomId/new'
-      path: '/room/$roomId/new'
+      path: '/new'
       fullPath: '/dashboard/$propertyId/room/$roomId/new'
       preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdNewRouteImport
-      parentRoute: typeof AuthedDashboardPropertyIdRoute
+      parentRoute: typeof AuthedDashboardPropertyIdRoomRoomIdRoute
     }
     '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId': {
       id: '/_authed/dashboard/$propertyId/room/$roomId/edit/$choreId'
-      path: '/room/$roomId/edit/$choreId'
+      path: '/edit/$choreId'
       fullPath: '/dashboard/$propertyId/room/$roomId/edit/$choreId'
       preLoaderRoute: typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRouteImport
-      parentRoute: typeof AuthedDashboardPropertyIdRoute
+      parentRoute: typeof AuthedDashboardPropertyIdRoomRoomIdRoute
     }
   }
 }
+
+interface AuthedDashboardPropertyIdRoomRoomIdRouteChildren {
+  AuthedDashboardPropertyIdRoomRoomIdNewRoute: typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
+  AuthedDashboardPropertyIdRoomRoomIdIndexRoute: typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
+  AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute: typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
+}
+
+const AuthedDashboardPropertyIdRoomRoomIdRouteChildren: AuthedDashboardPropertyIdRoomRoomIdRouteChildren =
+  {
+    AuthedDashboardPropertyIdRoomRoomIdNewRoute:
+      AuthedDashboardPropertyIdRoomRoomIdNewRoute,
+    AuthedDashboardPropertyIdRoomRoomIdIndexRoute:
+      AuthedDashboardPropertyIdRoomRoomIdIndexRoute,
+    AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute:
+      AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute,
+  }
+
+const AuthedDashboardPropertyIdRoomRoomIdRouteWithChildren =
+  AuthedDashboardPropertyIdRoomRoomIdRoute._addFileChildren(
+    AuthedDashboardPropertyIdRoomRoomIdRouteChildren,
+  )
 
 interface AuthedDashboardPropertyIdRouteChildren {
   AuthedDashboardPropertyIdInviteRoute: typeof AuthedDashboardPropertyIdInviteRoute
   AuthedDashboardPropertyIdIndexRoute: typeof AuthedDashboardPropertyIdIndexRoute
   AuthedDashboardPropertyIdFloorplanEditRoute: typeof AuthedDashboardPropertyIdFloorplanEditRoute
-  AuthedDashboardPropertyIdRoomRoomIdNewRoute: typeof AuthedDashboardPropertyIdRoomRoomIdNewRoute
-  AuthedDashboardPropertyIdRoomRoomIdIndexRoute: typeof AuthedDashboardPropertyIdRoomRoomIdIndexRoute
-  AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute: typeof AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute
+  AuthedDashboardPropertyIdRoomRoomIdRoute: typeof AuthedDashboardPropertyIdRoomRoomIdRouteWithChildren
 }
 
 const AuthedDashboardPropertyIdRouteChildren: AuthedDashboardPropertyIdRouteChildren =
@@ -398,12 +435,8 @@ const AuthedDashboardPropertyIdRouteChildren: AuthedDashboardPropertyIdRouteChil
     AuthedDashboardPropertyIdIndexRoute: AuthedDashboardPropertyIdIndexRoute,
     AuthedDashboardPropertyIdFloorplanEditRoute:
       AuthedDashboardPropertyIdFloorplanEditRoute,
-    AuthedDashboardPropertyIdRoomRoomIdNewRoute:
-      AuthedDashboardPropertyIdRoomRoomIdNewRoute,
-    AuthedDashboardPropertyIdRoomRoomIdIndexRoute:
-      AuthedDashboardPropertyIdRoomRoomIdIndexRoute,
-    AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute:
-      AuthedDashboardPropertyIdRoomRoomIdEditChoreIdRoute,
+    AuthedDashboardPropertyIdRoomRoomIdRoute:
+      AuthedDashboardPropertyIdRoomRoomIdRouteWithChildren,
   }
 
 const AuthedDashboardPropertyIdRouteWithChildren =
